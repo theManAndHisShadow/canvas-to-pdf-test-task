@@ -5,11 +5,10 @@
   "main": "index.js",
   "author": "kazumov",
   "license": "MIT",
-
   "dependencies": {
+    "canvaskit-wasm": "^0.39.1",
     "pixi.js-legacy": "^7.2.4"
   },
-
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
     "html-webpack-plugin": "^5.6.3",
@@ -21,7 +20,6 @@
     "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4"
   },
-  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
