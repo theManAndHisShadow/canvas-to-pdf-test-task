@@ -1,5 +1,5 @@
 {
-  "name": "skia-to-pdf-test-task",
+  "name": "canvas-to-pdf-test-task",
   "version": "0.0.1",
   "description": "Test task implementation",
   "main": "index.js",
