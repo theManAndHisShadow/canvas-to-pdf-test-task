@@ -1,1 +1,4 @@
-console.log('Hello world!');
+import { debugLog } from "./helpers";
+
+
+debugLog('ok', 'app started');
