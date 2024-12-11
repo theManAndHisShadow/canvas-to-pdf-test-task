@@ -42,8 +42,22 @@ circle_1.on('pointerdown', () => {
     console.log('circle_1 pointerdown!', circle_1);
 });
 
+
+
+// Создаём квадрат
+const square_1 = new PIXI.Graphics();
+
+square_1.lineStyle(3, getColor('brightBlue'))
+        .beginFill(getColor('darkBlue'))
+        .drawRect(centerPos.x, centerPos.y, 170, 170)
+        .endFill();
+square_1.eventMode = 'dynamic';
+square_1.on('pointerdown', () => {
+    console.log('square_1 pointerdown!', square_1);
+});
+
 // Добавляем фигуру в главный контейнер
-mainContainer.addChild(circle_1);
+mainContainer.addChild(circle_1, square_1);
 
 // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
