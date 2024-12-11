@@ -72,12 +72,12 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
         const bgColor = debugStatuses[status].bg;
 
         console.log(
-            `%c[Debug log]:%c status - %c${debugStatuses[status].labelText}%c, ${messageText}.`, 
+            `%c[${debugStatuses[status].labelText}]%c %c[Debug log]:%c ${messageText}.`, 
     
             // Получаем стили с помощью кастомных локальных функций
-            getColoredBubbleStyle('white', 'rgba(0, 0, 0, 0.4)'),
-            getClearFixStyle(),
             getColoredBubbleStyle(fgColor, bgColor),
+            getClearFixStyle(),
+            getColoredBubbleStyle('white', 'rgba(0, 0, 0, 0.4)'),
             getClearFixStyle(),
         );
     }
