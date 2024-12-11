@@ -80,5 +80,12 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
             getColoredBubbleStyle('white', 'rgba(0, 0, 0, 0.4)'),
             getClearFixStyle(),
         );
+
+        if(status === 'err') {
+            // Вручную прерываем исполнение коды и указываем трассировку исполнения
+            const error = new Error('Please pay attention to the error message above. Check execution trace below: ');
+            Error.captureStackTrace(error, debugLog);
+            throw error;
+        }
     }
 }
