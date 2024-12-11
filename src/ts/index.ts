@@ -1,4 +1,4 @@
-import { debugLog } from "./helpers";
+import { debugLog, getColor } from "./helpers";
 import * as PIXI from 'pixi.js-legacy';
 
 // Корневой элемент приложения
@@ -20,7 +20,7 @@ const centerPos = {x: width / 2, y: height / 2};
 const app = new PIXI.Application({
     width: 500,
     height: 500,
-    background: 'black',
+    background: getColor('carbon'),
 });
 
 // Добавляем в HTML дерево холст
@@ -30,17 +30,20 @@ appRoot.appendChild(app.view as HTMLCanvasElement);
 const mainContainer = new PIXI.Container();
 
 // Создаём первую геометрическую фигуру
-const geometry1 = new PIXI.Graphics();
+const circle_1 = new PIXI.Graphics();
 
 // Отрисовываем круг с интерактивностью
-geometry1.beginFill('#ff0000').drawCircle(centerPos.x, centerPos.y, 100).endFill();
-geometry1.eventMode = 'dynamic';
-geometry1.on('pointerdown', () => {
-    console.log('geometry1 pointerdown!', geometry1);
+circle_1.lineStyle(3, getColor('brightRed'))
+        .beginFill(getColor('darkRed'))
+        .drawCircle(centerPos.x, centerPos.y, 100)
+        .endFill();
+circle_1.eventMode = 'dynamic';
+circle_1.on('pointerdown', () => {
+    console.log('circle_1 pointerdown!', circle_1);
 });
 
 // Добавляем фигуру в главный контейнер
-mainContainer.addChild(geometry1);
+mainContainer.addChild(circle_1);
 
 // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
