@@ -1,4 +1,5 @@
 import { debugLog, getColor } from "./helpers";
+import createStripedContainer from "./stripedContainer";
 import * as PIXI from 'pixi.js-legacy';
 
 // Корневой элемент приложения
@@ -39,7 +40,7 @@ triangle_1.beginFill(getColor('darkGreen'))
           .drawPolygon([
                 165, 50,   // верхняя вершина
                 285, 250,  // правая нижняя вершина
-                55, 250    // левая нишняя вершина
+                55, 250    // левая нижняя вершина
           ])
           .endFill();
 triangle_1.eventMode = 'dynamic';
@@ -75,9 +76,10 @@ square_1.on('pointerdown', () => {
     debugLog('info', '`square_1` pointerdown event triggered');
 });
 
+const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 7, 'purple');
 
 // Добавляем ранее созданные фигуры в главный контейнер
-mainContainer.addChild(triangle_1, circle_1, square_1);
+mainContainer.addChild(subContainer_1, triangle_1, circle_1, square_1);
 
 // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
