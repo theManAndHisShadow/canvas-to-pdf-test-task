@@ -38,8 +38,8 @@ const triangle_1 = new PIXI.Graphics();
 triangle_1.beginFill(getColor('darkGreen'))
           .lineStyle(3, getColor('brightGreen'))
           .drawPolygon([
-                165, 50,   // верхняя вершина
-                285, 250,  // правая нижняя вершина
+                168, 50,   // верхняя вершина
+                288, 250,  // правая нижняя вершина
                 55, 250    // левая нижняя вершина
           ])
           .endFill();
@@ -76,10 +76,30 @@ square_1.on('pointerdown', () => {
     debugLog('info', '`square_1` pointerdown event triggered');
 });
 
-const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 7, 'purple');
+// Создаём контейнер с полосками, внутри содержатся суб-элементы в виде линий
+const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 5, 'purple');
+subContainer_1.eventMode = 'dynamic';
+subContainer_1.on('pointerdown', () => {
+    debugLog('info', '`subContainer_1` pointerdown event triggered');
+});
 
-// Добавляем ранее созданные фигуры в главный контейнер
-mainContainer.addChild(subContainer_1, triangle_1, circle_1, square_1);
+const windowTexture = PIXI.Texture.from('../assets/window.png');
+const windowSprite = new PIXI.Sprite(windowTexture);
+
+let coeff = 0.75;
+windowSprite.width = 339 * coeff;
+windowSprite.height = 262 * coeff;
+
+windowSprite.x = 167;
+windowSprite.y = 48;
+
+windowSprite.eventMode = 'dynamic';
+windowSprite.on('pointerdown', () => {
+    debugLog('info', '`windowSprite` pointerdown event triggered');
+});
+
+// Добавляем ранее созданные элементы в главный контейнер
+mainContainer.addChild(subContainer_1, windowSprite, triangle_1, circle_1, square_1);
 
 // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
