@@ -27,5 +27,8 @@ export default function createStripedContainer(x: number, y: number, width: numb
         container.addChild(line);
     }
 
+    // Устанавливаем хитовую область
+    container.hitArea = new PIXI.Rectangle(x, y, x + width, y + height);
+
     return container;
 }
