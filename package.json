@@ -1,6 +1,6 @@
 {
   "name": "canvas-to-pdf-test-task",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Test task implementation",
   "main": "index.js",
   "author": "kazumov",
@@ -18,10 +18,12 @@
     "ts-loader": "^9.5.1",
     "typescript": "^5.7.2",
     "webpack": "^5.97.1",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js",
+    "server": "webpack serve --config webpack.server.config.js --open"
   }
 }
