@@ -1,18 +1,21 @@
 import { debugLog, getColor } from "./helpers";
-import createStripedContainer from "./stripedContainer";
+import createStripedContainer from "./core/stripedContainer";
 import * as PIXI from 'pixi.js-legacy';
+import UI from "./UI/UI";
+
+// Глобальная ширина и высота холста
+const width = 500;
+const height = 500;
+
+const appRootSelector = '#app-root';
 
 // Корневой элемент приложения
-const appRoot = document.querySelector('#app-root');
+const appRoot = document.querySelector(appRootSelector);
 
 // Проверяем что корень существует и выкидываем ошибку если корень ен найден
 if(!appRoot) {
     debugLog('err', "can`t find '#app-root' element at DOM");
 }
-
-// Глобальная ширина и высота холста
-const width = 500;
-const height = 500;
 
 // Центр холста
 const centerPos = {x: width / 2, y: height / 2};
@@ -26,6 +29,14 @@ const app = new PIXI.Application({
 
 // Добавляем в HTML дерево холст
 appRoot.appendChild(app.view as HTMLCanvasElement);
+
+// создлаём объект интерфейса
+const ui = new UI(appRootSelector, 350, height);
+
+// добавляем первое событие для кнопки
+ui.elements.getRandomShape.addEventListener('click', () => {
+    debugLog('info', '`ui.elements.getRandomShape` click event triggered');
+});
 
 // Создаём главный контейнер
 const mainContainer = new PIXI.Container();
