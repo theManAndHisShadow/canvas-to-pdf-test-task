@@ -3,6 +3,20 @@ import createStripedContainer from "./core/stripedContainer";
 import * as PIXI from 'pixi.js-legacy';
 import UI from "./UI/UI";
 
+// Импортируем тему и вспомогательную функциз из библиотеки 'json2html'
+import draculaV2Theme from "./libs/json2html/themes/user.theme";
+import json2html from "./libs/json2html/json2html.min";
+
+// локальная хелпер функция для отрисовки объекта в html
+const convertObjectToHTML = (objectToRender: object) => {
+    //@ts-ignore
+    return json2html({
+        json: JSON.stringify(objectToRender),
+        theme: draculaV2Theme,
+        showTypeOnHover: true,
+    });
+};
+
 // Глобальная ширина и высота холста
 const width = 500;
 const height = 500;
@@ -56,6 +70,10 @@ triangle_1.beginFill(getColor('darkGreen'))
           .endFill();
 triangle_1.eventMode = 'dynamic';
 triangle_1.on('pointerdown', () => {
+    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+        target: 'triangle_1',
+    }));
+
     debugLog('info', '`triangle_1` pointerdown event triggered');
 });
 
@@ -70,6 +88,10 @@ circle_1.lineStyle(3, getColor('brightRed'))
         .endFill();
 circle_1.eventMode = 'dynamic';
 circle_1.on('pointerdown', () => {
+    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+        target: 'circle_1',
+    }));
+
     debugLog('info', '`circle_1` pointerdown event triggered');
 });
 
@@ -84,6 +106,10 @@ square_1.lineStyle(3, getColor('brightBlue'))
         .endFill();
 square_1.eventMode = 'dynamic';
 square_1.on('pointerdown', () => {
+    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+        target: 'square_1',
+    }));
+
     debugLog('info', '`square_1` pointerdown event triggered');
 });
 
@@ -91,6 +117,10 @@ square_1.on('pointerdown', () => {
 const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 5, 'purple');
 subContainer_1.eventMode = 'dynamic';
 subContainer_1.on('pointerdown', () => {
+    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+        target: 'subContainer_1',
+    }));
+
     debugLog('info', '`subContainer_1` pointerdown event triggered');
 });
 
@@ -106,6 +136,10 @@ windowSprite.y = 48;
 
 windowSprite.eventMode = 'dynamic';
 windowSprite.on('pointerdown', () => {
+    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+        target: 'windowSprite',
+    }));
+
     debugLog('info', '`windowSprite` pointerdown event triggered');
 });
 
