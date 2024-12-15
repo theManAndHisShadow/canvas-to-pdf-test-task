@@ -55,98 +55,127 @@ ui.elements.getRandomShape.addEventListener('click', () => {
 // Создаём главный контейнер
 const mainContainer = new PIXI.Container();
 
+interface CollectionItem {
+    zIndex: number;
+    objectRef: any;
+    renderAt: (container: PIXI.Container) => PIXI.Graphics | PIXI.Container;
+}
 
-// Создаём заготовку фигуры
-const triangle_1 = new PIXI.Graphics();
+const objects: Record<string, CollectionItem> = {
+    triangle_1: {
+        zIndex: 1,
+        objectRef: null,
+        renderAt: (container: PIXI.Container) => {
+            // Создаём заготовку фигуры
+            const graphics = new PIXI.Graphics();
+            
+            // Отрисовываем заготовку как зелёный треугольник
+            graphics.beginFill(getColor('darkGreen'))
+                 .lineStyle(3, getColor('brightGreen'))
+                 .drawPolygon([
+                    168, 50,   // верхняя вершина
+                    288, 250,  // правая нижняя вершина
+                    55, 250    // левая нижняя вершина
+                 ])
+                 .endFill();
 
-// Отрисовываем заготовку как зелёный треугольник
-triangle_1.beginFill(getColor('darkGreen'))
-          .lineStyle(3, getColor('brightGreen'))
-          .drawPolygon([
-                168, 50,   // верхняя вершина
-                288, 250,  // правая нижняя вершина
-                55, 250    // левая нижняя вершина
-          ])
-          .endFill();
-triangle_1.eventMode = 'dynamic';
-triangle_1.on('pointerdown', () => {
-    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-        target: 'triangle_1',
-    }));
+            container.addChild(graphics);
+            return graphics;
+        },
+    },
 
-    debugLog('info', '`triangle_1` pointerdown event triggered');
-});
+    circle_1: {
+        zIndex: 3,
+        objectRef: null,
+        renderAt: (container: PIXI.Container) => {
+            // Создаём заготовку фигуры
+            const graphics = new PIXI.Graphics();
 
+            // Отрисовываем заготовку как красный круг
+            graphics.lineStyle(3, getColor('brightRed'))
+                    .beginFill(getColor('darkRed'))
+                    .drawCircle(centerPos.x, centerPos.y, 100)
+                    .endFill();
 
-// Создаём заготовку фигуры
-const circle_1 = new PIXI.Graphics();
+            container.addChild(graphics);
+            return graphics;
+        },
+    },
 
-// Отрисовываем заготовку как красный круг
-circle_1.lineStyle(3, getColor('brightRed'))
-        .beginFill(getColor('darkRed'))
-        .drawCircle(centerPos.x, centerPos.y, 100)
-        .endFill();
-circle_1.eventMode = 'dynamic';
-circle_1.on('pointerdown', () => {
-    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-        target: 'circle_1',
-    }));
+    square_1: {
+        zIndex: 4,
+        objectRef: null,
+        renderAt: (container: PIXI.Container) => {
+            // Создаём заготовку фигуры
+            const graphics = new PIXI.Graphics();
 
-    debugLog('info', '`circle_1` pointerdown event triggered');
-});
+            graphics.lineStyle(3, getColor('brightBlue'))
+                    .beginFill(getColor('darkBlue'))
+                    .drawRect(centerPos.x, centerPos.y, 170, 170)
+                    .endFill();
+                    container.addChild(graphics);
+                    return graphics;
+        },
+    },
 
+    subContainer_1: {
+        zIndex: 1,
+        objectRef: null,
+        renderAt: (container: PIXI.Container) => {
+            // Создаём контейнер с полосками, внутри содержатся суб-элементы в виде линий
+            const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 5, 'purple');
 
-// Создаём заготовку фигуры
-const square_1 = new PIXI.Graphics();
+            container.addChild(subContainer_1);
+            return subContainer_1;
+        },
+    }, 
+    
+    sprite_1: {
+        zIndex: 0,
+        objectRef: null,
+        renderAt: (container: PIXI.Container) => {
+            const windowTexture = PIXI.Texture.from('../assets/window.png');
+            const windowSprite = new PIXI.Sprite(windowTexture);
 
-// Отрисовываем заготовку как синий квадрат
-square_1.lineStyle(3, getColor('brightBlue'))
-        .beginFill(getColor('darkBlue'))
-        .drawRect(centerPos.x, centerPos.y, 170, 170)
-        .endFill();
-square_1.eventMode = 'dynamic';
-square_1.on('pointerdown', () => {
-    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-        target: 'square_1',
-    }));
+            let coeff = 0.75;
+            windowSprite.width = 339 * coeff;
+            windowSprite.height = 262 * coeff;
 
-    debugLog('info', '`square_1` pointerdown event triggered');
-});
+            windowSprite.x = 167;
+            windowSprite.y = 48;
 
-// Создаём контейнер с полосками, внутри содержатся суб-элементы в виде линий
-const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 5, 'purple');
-subContainer_1.eventMode = 'dynamic';
-subContainer_1.on('pointerdown', () => {
-    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-        target: 'subContainer_1',
-    }));
+            container.addChild(windowSprite);
+            return windowSprite;
+        },
+    },
+};
 
-    debugLog('info', '`subContainer_1` pointerdown event triggered');
-});
+const renderQueue = Object.fromEntries(Object.entries(objects).sort(([, a], [, b]) => a.zIndex - b.zIndex));
 
-const windowTexture = PIXI.Texture.from('../assets/window.png');
-const windowSprite = new PIXI.Sprite(windowTexture);
+for(const key in renderQueue) {
+    let object = objects[key];
+    let renderedObject = object.renderAt(mainContainer);
 
-let coeff = 0.75;
-windowSprite.width = 339 * coeff;
-windowSprite.height = 262 * coeff;
+    renderedObject.eventMode = 'dynamic';
+    renderedObject.cursor = 'pointer';
 
-windowSprite.x = 167;
-windowSprite.y = 48;
+    renderedObject.on('pointerover', () => {
+        ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
+            target: key,
+        }));
 
-windowSprite.eventMode = 'dynamic';
-windowSprite.on('pointerdown', () => {
-    ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-        target: 'windowSprite',
-    }));
+        debugLog('info', '`'+ key +'` pointerover event triggered');
+    });
 
-    debugLog('info', '`windowSprite` pointerdown event triggered');
-});
+    renderedObject.on('pointerout', () => {
+        ui.elements.mouseTarget.resetValue();
+    });
 
-// Добавляем ранее созданные элементы в главный контейнер
-mainContainer.addChild(subContainer_1, windowSprite, triangle_1, circle_1, square_1);
+    object.objectRef = renderedObject;
+    console.log(object);
+}
 
-// Добавляем контейнер на уровень (холст)
+// // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
 
 debugLog('ok', 'app started');
