@@ -28,11 +28,19 @@ export default class UI {
             this.root = container;
 
             // создаём элементы панели
-            const getRandomShape = new UIElement({
+            const clearCanvas = new UIElement({
                   type: 'button',
-                  label: 'Get random shape',
-                  classNames: ['app-ui__get-random-shape-button'],
+                  label: 'Clear canvas',
+                  classNames: ['app-ui__clear-canvas'],
                   value: false,
+            });
+
+            const mainContainerInfo = new UIElement({
+                  type: 'text',
+                  label: 'Stage info',
+                  classNames: ['app-stage-info-display'],
+                  value: null,
+                  settingsKey: null,
             });
 
             const mouseTarget = new UIElement({
@@ -48,7 +56,8 @@ export default class UI {
 
             // записываем их в экземляр класса
             this.elements = {
-                getRandomShape,
+                clearCanvas,
+                mainContainerInfo,
                 mouseTarget,
             };
 
@@ -58,7 +67,8 @@ export default class UI {
 
             // добавляем в внутреннией контейнер панели
             containerInner.appendChild(title);
-            containerInner.appendChild(this.elements.getRandomShape.body);
+            containerInner.appendChild(this.elements.clearCanvas.body);      
+            containerInner.appendChild(this.elements.mainContainerInfo.body);      
             containerInner.appendChild(this.elements.mouseTarget.body);
 
             // добавляем внутренности в контейнер UI
