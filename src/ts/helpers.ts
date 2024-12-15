@@ -91,13 +91,21 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
 }
 
 
+export function decimalToRGB(decimal: number): string {
+    const r = (decimal >> 16) & 0xff; // Красный
+    const g = (decimal >> 8) & 0xff;  // Зелёный
+    const b = decimal & 0xff;         // Синий
+    return `rgba(${r}, ${g}, ${b}, 1)`;
+}
+
+
 
 /**
  * Вспомогательная функция, которая позволяет получить rgba-код цвета по названию.
- * @param name - название цвета
+ * @param query - запрос - вернёт rgba цвет, если такой есть, если передан сам rgba цвет то вернёт его название
  * @returns 
  */
-export function getColor(name: string): string {
+export function getColor(query: string): string {
     // Создаём локальный интерфейс для хранения пар "ключ (название цвета): код цвета (rgba)"
     interface colorStorage {
         [key: string]: string,
@@ -116,5 +124,5 @@ export function getColor(name: string): string {
         brightGreen: 'rgba(6, 114, 6, 1)',
     }
 
-    return colors[name];
+    return /rgba/.test(query) ? Object.entries(colors).find(([key, value]) => value === query)?.[0] : colors[query];
 }
