@@ -1,4 +1,4 @@
-import { debugLog, getColor } from "./helpers";
+import { debugLog, decimalToRGB, getColor } from "./helpers";
 import createStripedContainer from "./core/stripedContainer";
 import * as PIXI from 'pixi.js-legacy';
 import UI from "./UI/UI";
@@ -14,6 +14,7 @@ const convertObjectToHTML = (objectToRender: object) => {
         json: JSON.stringify(objectToRender),
         theme: draculaV2Theme,
         showTypeOnHover: true,
+        showLevel: 10,
     });
 };
 
@@ -58,7 +59,7 @@ const mainContainer = new PIXI.Container();
 interface CollectionItem {
     zIndex: number;
     objectRef: any;
-    renderAt: (container: PIXI.Container) => PIXI.Graphics | PIXI.Container;
+    renderAt: (container: PIXI.Container) => PIXI.Graphics | PIXI.Container | PIXI.Sprite;
 }
 
 const objects: Record<string, CollectionItem> = {
@@ -71,13 +72,14 @@ const objects: Record<string, CollectionItem> = {
             
             // Отрисовываем заготовку как зелёный треугольник
             graphics.beginFill(getColor('darkGreen'))
-                 .lineStyle(3, getColor('brightGreen'))
-                 .drawPolygon([
+            graphics.lineStyle(3, getColor('brightGreen'))
+            graphics.drawPolygon([
                     168, 50,   // верхняя вершина
                     288, 250,  // правая нижняя вершина
                     55, 250    // левая нижняя вершина
-                 ])
-                 .endFill();
+            ]);
+
+            // graphics.endFill();
 
             container.addChild(graphics);
             return graphics;
@@ -93,9 +95,10 @@ const objects: Record<string, CollectionItem> = {
 
             // Отрисовываем заготовку как красный круг
             graphics.lineStyle(3, getColor('brightRed'))
-                    .beginFill(getColor('darkRed'))
-                    .drawCircle(centerPos.x, centerPos.y, 100)
-                    .endFill();
+            graphics.beginFill(getColor('darkRed'));
+            graphics.drawCircle(centerPos.x, centerPos.y, 100);
+
+            // graphics.endFill();
 
             container.addChild(graphics);
             return graphics;
@@ -109,12 +112,13 @@ const objects: Record<string, CollectionItem> = {
             // Создаём заготовку фигуры
             const graphics = new PIXI.Graphics();
 
-            graphics.lineStyle(3, getColor('brightBlue'))
-                    .beginFill(getColor('darkBlue'))
-                    .drawRect(centerPos.x, centerPos.y, 170, 170)
-                    .endFill();
-                    container.addChild(graphics);
-                    return graphics;
+            graphics.lineStyle(3, getColor('brightBlue'));
+            graphics.beginFill(getColor('darkBlue'));
+            graphics.drawRect(centerPos.x, centerPos.y, 170, 170);
+            // graphics.endFill();
+            
+            container.addChild(graphics);
+            return graphics;
         },
     },
 
@@ -160,10 +164,30 @@ for(const key in renderQueue) {
     renderedObject.cursor = 'pointer';
 
     renderedObject.on('pointerover', () => {
-        ui.elements.mouseTarget.replaceChild(convertObjectToHTML({
-            target: key,
-        }));
+        let data: any = {
+            name: key,
+        };
 
+        if(renderedObject instanceof PIXI.Sprite) {
+            data["class"] = "PIXI.Sprite";
+            data.texture = {
+                url: renderedObject._texture.textureCacheIds[0].split('/')[2],
+                width: renderedObject._texture.width,
+                height: renderedObject._texture.height,
+            }
+        } else if(renderedObject instanceof PIXI.Graphics) {
+            data["class"] = "PIXI.Graphics";
+            // так конечно лучше не делать, но в данном случае я получаю цвет, а не назначаю
+            data.fillColor = getColor(decimalToRGB((renderedObject as any)._fillStyle.color));
+            data.lineColor = getColor(decimalToRGB((renderedObject as any)._lineStyle.color));
+        } else if(renderedObject instanceof PIXI.Container) {
+            data["class"] = "PIXI.Container";
+            data.contains = renderedObject.children.length + ' elements';
+        }
+
+        ui.elements.mouseTarget.replaceChild(convertObjectToHTML(data));
+
+        console.log(renderedObject);
         debugLog('info', '`'+ key +'` pointerover event triggered');
     });
 
@@ -174,7 +198,7 @@ for(const key in renderQueue) {
     object.objectRef = renderedObject;
     console.log(object);
 }
-
+ 
 // // Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
 
