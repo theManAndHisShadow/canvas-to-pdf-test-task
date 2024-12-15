@@ -48,14 +48,32 @@ appRoot.appendChild(app.view as HTMLCanvasElement);
 // создлаём объект интерфейса
 const ui = new UI(appRootSelector, 350, height);
 
-// добавляем первое событие для кнопки
-ui.elements.getRandomShape.addEventListener('click', () => {
-    debugLog('info', '`ui.elements.getRandomShape` click event triggered');
-});
-
 // Создаём главный контейнер
 const mainContainer = new PIXI.Container();
 
+// Обработчик события "обновление контейнера"
+const mainContainerUpdateHandler = () => {
+    const stageData = {
+        contains: `${mainContainer.children.length} elements`,
+    };
+
+    ui.elements.mainContainerInfo.replaceChild(convertObjectToHTML(stageData));
+};
+
+// обновляем инфо при обновлении наполнения контейнера
+mainContainer.on('childAdded', mainContainerUpdateHandler);
+mainContainer.on('childRemoved', mainContainerUpdateHandler);
+
+// очистка содержимого главного контейнера
+ui.elements.clearCanvas.addEventListener('click', () => {
+    mainContainer.removeChildren();
+
+    debugLog('info', '`ui.elements.clearCanvas` click event triggered');
+});
+
+
+
+// Далее отрисовка элементов холста
 interface CollectionItem {
     zIndex: number;
     objectRef: any;
@@ -156,6 +174,7 @@ const objects: Record<string, CollectionItem> = {
 
 const renderQueue = Object.fromEntries(Object.entries(objects).sort(([, a], [, b]) => a.zIndex - b.zIndex));
 
+// Отрсовываем объекты и добавляем интерактивность
 for(const key in renderQueue) {
     let object = objects[key];
     let renderedObject = object.renderAt(mainContainer);
@@ -187,7 +206,6 @@ for(const key in renderQueue) {
 
         ui.elements.mouseTarget.replaceChild(convertObjectToHTML(data));
 
-        console.log(renderedObject);
         debugLog('info', '`'+ key +'` pointerover event triggered');
     });
 
@@ -196,10 +214,10 @@ for(const key in renderQueue) {
     });
 
     object.objectRef = renderedObject;
-    console.log(object);
 }
  
-// // Добавляем контейнер на уровень (холст)
+// Добавляем контейнер на уровень (холст)
 app.stage.addChild(mainContainer);
+
 
 debugLog('ok', 'app started');
