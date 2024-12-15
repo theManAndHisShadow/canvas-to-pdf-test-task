@@ -91,6 +91,12 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
 }
 
 
+
+/**
+ * Переведит цвет из десетяричной системы в rgba
+ * @param decimal 
+ * @returns 
+ */
 export function decimalToRGB(decimal: number): string {
     const r = (decimal >> 16) & 0xff; // Красный
     const g = (decimal >> 8) & 0xff;  // Зелёный
