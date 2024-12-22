@@ -37,7 +37,7 @@ if(!appRoot) {
 }
 
 // Центр холста
-const centerPos = {x: width / 2, y: height / 2};
+const canvasCenterPoint = {x: width / 2, y: height / 2};
 
 // Инициалищзируем pixi приложение
 const app = new PIXI.Application({
@@ -70,14 +70,14 @@ mainContainer.on('childAdded', mainContainerUpdateHandler);
 mainContainer.on('childRemoved', mainContainerUpdateHandler);
 
 // Массив подготовленных сцен
-// Имя ключа совпадает с клюбчом из списка 'ui.element.selectedScenes.valuesList'
+// Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
 const scenes: Record<string, any> = {
     showcase: createShowcaseScene({
-        centerPoint: {x: width / 2, y: height / 2}
+        centerPoint: canvasCenterPoint,
     }),
 
     composition: createCompositionScene({
-        centerPoint: {x: width / 2, y: height / 2},
+        centerPoint: canvasCenterPoint,
     }),
 };
 
