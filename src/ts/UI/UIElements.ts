@@ -1,5 +1,5 @@
 
-import SynteticEventTarget from "../core/SynteticEventTarget";
+import SynteticEventTarget from "./SynteticEventTarget";
 
 interface UIElementType {
     type: "text" | "button" | "checkbox" | "dropdown-list";
