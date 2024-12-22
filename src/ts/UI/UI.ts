@@ -27,12 +27,13 @@ export default class UI {
             // в данном случае root - локальный корень (внешний элемент, содержащий весь блок панели)
             this.root = container;
 
-            // создаём элементы панели
-            const clearCanvas = new UIElement({
-                  type: 'button',
-                  label: 'Clear canvas',
-                  classNames: ['app-ui__clear-canvas'],
-                  value: false,
+            const selectedScene = new UIElement({
+                  type: 'dropdown-list',
+                  label: 'Select scene',
+                  classNames: ['app-ui__dropdown-list'],
+                  valuesList: ['showcase', 'composition'],
+                  value: 'showcase',
+                  settingsKey: 'selectedScene',
             });
 
             const mainContainerInfo = new UIElement({
@@ -56,7 +57,7 @@ export default class UI {
 
             // записываем их в экземляр класса
             this.elements = {
-                clearCanvas,
+                selectedScene,
                 mainContainerInfo,
                 mouseTarget,
             };
@@ -67,7 +68,7 @@ export default class UI {
 
             // добавляем в внутреннией контейнер панели
             containerInner.appendChild(title);
-            containerInner.appendChild(this.elements.clearCanvas.body);      
+            containerInner.appendChild(this.elements.selectedScene.body);
             containerInner.appendChild(this.elements.mainContainerInfo.body);      
             containerInner.appendChild(this.elements.mouseTarget.body);
 
