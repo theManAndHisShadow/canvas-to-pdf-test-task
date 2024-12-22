@@ -1,5 +1,16 @@
 
 /**
+ * Переводит градусы в радианы
+ * @param degrees - граудсы
+ * @returns - радианы
+ */
+export function degrees2radians(degrees: number) {
+    return degrees * (Math.PI / 180);
+}
+
+
+
+/**
  * Выводит отладочную инфо в консоль в удобнмо формате
  * @param status - статус сообщения
  * @param messageText - текст сообщения
@@ -106,6 +117,7 @@ export function decimalToRGB(decimal: number): string {
 
 
 
+
 /**
  * Вспомогательная функция, которая позволяет получить rgba-код цвета по названию.
  * @param query - запрос - вернёт rgba цвет, если такой есть, если передан сам rgba цвет то вернёт его название
@@ -119,6 +131,7 @@ export function getColor(query: string): string {
 
     const colors: colorStorage = {
         carbon:      'rgba(14, 14, 14, 1)',
+        lightCarbon: 'rgba(54, 54, 54, 1)',
         
         darkRed:     'rgba(38, 12, 12, 1)',
         brightRed:   'rgba(114, 6, 6, 1)',
@@ -128,6 +141,9 @@ export function getColor(query: string): string {
 
         darkGreen:   'rgba(12, 38, 12, 1)',
         brightGreen: 'rgba(6, 114, 6, 1)',
+
+        darkSilver:   'rgba(96, 96, 96, 1)',
+        brightSilver: 'rgba(212, 212, 212, 1)',
     }
 
     return /rgba/.test(query) ? Object.entries(colors).find(([key, value]) => value === query)?.[0] : colors[query];
