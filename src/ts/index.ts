@@ -58,11 +58,13 @@ const mainContainer = new PIXI.Container();
 
 // Обработчик события "обновление контейнера"
 const mainContainerUpdateHandler = () => {
-    const stageData = {
-        contains: `${mainContainer.children.length} elements`,
-    };
-
-    ui.elements.mainContainerInfo.replaceChild(convertObjectToHTML(stageData));
+    if(mainContainer.children.length > 0) {
+        const stageData = {
+            contains: `${mainContainer.children[0].children.length} elements`,
+        };
+    
+        ui.elements.mainContainerInfo.replaceChild(convertObjectToHTML(stageData));
+    }
 };
 
 // обновляем инфо при обновлении наполнения контейнера
