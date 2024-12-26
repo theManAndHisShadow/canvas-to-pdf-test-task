@@ -14,6 +14,8 @@ import createCompositionScene from "./scenes/composition.scene";
 import pixi2skia from "./core/pixi2skia/convert";
 import CanvasKitInit from "canvaskit-wasm";
 
+const preloader = document.querySelector('#app__global-preloder');
+
 // локальная хелпер функция для отрисовки объекта в html
 const convertObjectToHTML = (objectToRender: object) => {
     //@ts-ignore
@@ -177,13 +179,15 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Добавляем контейнер на уровень (холст)
     app.stage.addChild(mainContainer);
 
-
     // После успешной загрузки используем canvasKit
     pixi2skia({
         from: mainContainer,
         to: skiaCanvas,
         use: canvasKit,
     }).catch(console.error);
+
+    // Убираем слой с анимацией загрузки как только всё холсты будут инициализированы и первая конвертация пройдёт успешно
+    preloader.classList.add('hidden');
 
     debugLog('ok', 'the application is fully launched and ready to work');
 }).catch((error) => {
