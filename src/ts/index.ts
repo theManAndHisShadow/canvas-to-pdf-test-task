@@ -11,7 +11,7 @@ import json2html from "./libs/json2html/json2html.min";
 import createShowcaseScene from "./scenes/showcase.scene";
 import createCompositionScene from "./scenes/composition.scene";
 
-import convertPixiContainerToSkia from "./core/convert";
+import pixi2skia from "./core/pixi2skia/convert";
 import CanvasKitInit from "canvaskit-wasm";
 
 // локальная хелпер функция для отрисовки объекта в html
@@ -106,11 +106,6 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Инициализация ранее выбранной сцены
     mainContainer.addChild(selectedScene);
 
-    // convertPixiContainerToSkia({
-    //     from: mainContainer,
-    //     to: skiaCanvas,
-    // }).catch(console.error);
-
 
     // Добавляем интерактивность к объектам всех сцен
     Object.values(scenes).forEach(scene => {
@@ -170,7 +165,7 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
 
 
         // После успешной загрузки используйте canvasKit
-        convertPixiContainerToSkia({
+        pixi2skia({
             from: mainContainer,
             to: skiaCanvas,
             use: canvasKit,
@@ -183,8 +178,8 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     app.stage.addChild(mainContainer);
 
 
-    // После успешной загрузки используйте canvasKit
-    convertPixiContainerToSkia({
+    // После успешной загрузки используем canvasKit
+    pixi2skia({
         from: mainContainer,
         to: skiaCanvas,
         use: canvasKit,
