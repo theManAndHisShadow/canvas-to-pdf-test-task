@@ -24,7 +24,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --env mode=production",
+    "build:dev": "webpack --env mode=development",
     "server": "webpack serve --config webpack.server.config.js --open"
   }
 }
