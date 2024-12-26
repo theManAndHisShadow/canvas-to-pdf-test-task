@@ -10,6 +10,7 @@ import json2html from "./libs/json2html/json2html.min";
 // импортируем подготовленные сцены
 import createShowcaseScene from "./scenes/showcase.scene";
 import createCompositionScene from "./scenes/composition.scene";
+import createPerspectiveScene from "./scenes/perspective.scene";
 
 import pixi2skia from "./core/pixi2skia/convert";
 import CanvasKitInit from "canvaskit-wasm";
@@ -99,6 +100,10 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
         composition: createCompositionScene({
             centerPoint: canvasCenterPoint,
         }),
+
+        perspective: createPerspectiveScene({
+            centerPoint: canvasCenterPoint,
+        }),
     };
 
     // 
@@ -133,7 +138,7 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
                 } else if (object instanceof PIXI.Graphics) {
                     data["class"] = "PIXI.Graphics";
                     // так конечно лучше не делать, но в данном случае я получаю цвет, а не назначаю
-                    data.fillColor = getColor(decimal2RGBString((object as any)._fillStyle.color));
+                    data.fillColor = getColor(decimal2RGBString((object as any)._fillStyle.color)) || decimal2RGBString((object as any)._fillStyle.color);
                     data.lineColor = getColor(decimal2RGBString((object as any)._lineStyle.color));
                 } else if (object instanceof PIXI.Container) {
                     data["class"] = "PIXI.Container";
