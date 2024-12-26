@@ -11,6 +11,96 @@ export function degrees2radians(degrees: number) {
 
 
 /**
+ * Преобразует радианы в градусы
+ * @param radians 
+ * @returns 
+ */
+export function radians2degrees(radians: number){
+    return radians * (180 / Math.PI);
+}
+
+
+
+/**
+ * Преобразует цвет в десятеричной системе в rgba массив, где каждый канал представлен чилом [r, g, b, a]
+ * @param decimal 
+ * @returns 
+ */
+export function decimal2RGBA(decimal: number): [number, number, number, number] {
+    const r = (decimal >> 16) & 0xff; // Красный
+    const g = (decimal >> 8) & 0xff;  // Зелёный
+    const b = decimal & 0xff;         // Синий
+    return [r, g, b, 1]; // a = 1 (полная непрозрачность)
+}
+
+
+
+/**
+ * Преобразует цвет в десятеричной системе в rgba строку "rgba(r, g, b, a)"
+ * @param decimal 
+ * @returns 
+ */
+export function decimal2RGBString(decimal: number): string {
+    const r = (decimal >> 16) & 0xff; // Красный
+    const g = (decimal >> 8) & 0xff;  // Зелёный
+    const b = decimal & 0xff;         // Синий
+    return `rgba(${r}, ${g}, ${b}, 1)`;
+}
+
+
+
+/**
+ * Превращает HTML изображение в HTML холст, после чего возвращает результат
+ * @param image - HTML изображение
+ * @returns - готовый холст с изображдением
+ */
+export function imageToCanvas(image: HTMLImageElement): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas 2D context not available');
+    context.drawImage(image, 0, 0);
+    return canvas;
+}
+
+
+
+/**
+ * Превращает холст в Uint8Array
+ * @param canvas - HTML холст
+ * @returns - последовательность чисел в виде Uint8Array
+ */
+export function canvasToUint8Array(canvas: HTMLCanvasElement): Uint8Array {
+    const dataUrl = canvas.toDataURL('image/png');
+    const base64 = dataUrl.split(',')[1];
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i);
+    }
+    return array;
+}
+
+
+
+/**
+ * Превращает Uint8Array в base64 строку
+ * @param uint8Array 
+ * @returns 
+ */
+export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+    // Преобразуем Uint8Array в строку
+    const binaryString = Array.from(uint8Array)
+        .map(byte => String.fromCharCode(byte))
+        .join('');
+    // Кодируем строку в Base64
+    return btoa(binaryString);
+}
+
+
+
+/**
  * Выводит отладочную инфо в консоль в удобнмо формате
  * @param status - статус сообщения
  * @param messageText - текст сообщения
@@ -100,21 +190,6 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
         }
     }
 }
-
-
-
-/**
- * Переведит цвет из десетяричной системы в rgba
- * @param decimal 
- * @returns 
- */
-export function decimalToRGB(decimal: number): string {
-    const r = (decimal >> 16) & 0xff; // Красный
-    const g = (decimal >> 8) & 0xff;  // Зелёный
-    const b = decimal & 0xff;         // Синий
-    return `rgba(${r}, ${g}, ${b}, 1)`;
-}
-
 
 
 

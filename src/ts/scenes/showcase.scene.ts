@@ -1,14 +1,12 @@
 import { Container } from "pixi.js-legacy";
 import { getColor } from "../helpers";
-import { createEquilateralTriangle, createRectangle, createCircle } from "../core/shapes";
-import { createSprite } from "../core/sprite";
-import { createStripedContainer } from "../core/stripedContainer";
+import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
 const createShowcaseScene = function(params: {centerPoint: {x: number, y: number}}){
     const center = params.centerPoint;
     const sceneContainer = new Container();
 
-    const triangle_1 = createEquilateralTriangle({
+    const triangle_1 = PIXI_Wrapper.createEquilateralTriangle({
         label: 'triangle_1',
         cx: 167, 
         cy: 150, 
@@ -18,7 +16,7 @@ const createShowcaseScene = function(params: {centerPoint: {x: number, y: number
         borderColor: getColor('brightGreen')
     });
 
-    const square_1 = createRectangle({
+    const square_1 = PIXI_Wrapper.createRectangle({
         label: 'square_1',
         x: center.x, 
         y: center.y, 
@@ -29,7 +27,7 @@ const createShowcaseScene = function(params: {centerPoint: {x: number, y: number
         borderColor: getColor('brightBlue'),
     });
 
-    const circle_1 = createCircle({
+    const circle_1 = PIXI_Wrapper.createCircle({
         label: 'circle_1',
         cx: center.x, 
         cy: center.y, 
@@ -39,12 +37,10 @@ const createShowcaseScene = function(params: {centerPoint: {x: number, y: number
         borderColor: getColor('brightRed')
     });
 
-    const sprite_1 = createSprite(167, 48, 254, 196, '../assets/window.png');
-    const subContainer_1 = createStripedContainer(53, 256, 193, 165, 2, 5, 'purple', -45);
+    const sprite_1 = PIXI_Wrapper.createSprite(167, 48, 254, 196, '../assets/window.png');
 
     sceneContainer.addChild(sprite_1);
     sceneContainer.addChild(triangle_1);
-    sceneContainer.addChild(subContainer_1);
     sceneContainer.addChild(circle_1);
     sceneContainer.addChild(square_1);
 

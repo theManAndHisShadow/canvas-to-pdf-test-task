@@ -1,6 +1,6 @@
 import { Container } from "pixi.js-legacy";
 import { getColor } from "../helpers";
-import { createRightTriangle, createRectangle, createCircle, createTriangle, createSemiCircle } from "../core/shapes";
+import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
 const createCompositionScene = function(params: {centerPoint: {x: number, y: number}}){
     const center = params.centerPoint;
@@ -10,7 +10,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
     const catetWidth = 90;
     const radius = catetWidth / 2;
 
-    const background = createRectangle({
+    const background = PIXI_Wrapper.createRectangle({
         label: 'background',
         x: center.x - (outerSquareWidth / 2), 
         y: center.y - (outerSquareWidth / 2), 
@@ -19,7 +19,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('brightSilver')
     });
 
-    const triangle_1 = createRightTriangle({
+    const triangle_1 = PIXI_Wrapper.createRightTriangle({
         label: 'triangle_1',
         cx: center.x - (outerSquareWidth / 2), 
         cy: center.y - (outerSquareWidth / 2),
@@ -29,7 +29,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         angle: 90,
     });
 
-    const triangle_2 = createRightTriangle({
+    const triangle_2 = PIXI_Wrapper.createRightTriangle({
         label: 'triangle_2',
         cx: center.x - (outerSquareWidth / 2) + catetWidth,
         cy: center.y - (outerSquareWidth / 2) + catetWidth,
@@ -39,7 +39,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         angle: -90,
     });
 
-    const big_Triangle_1 = createRightTriangle({
+    const big_Triangle_1 = PIXI_Wrapper.createRightTriangle({
         label: 'big_Triangle_1',
         cx: center.x - (outerSquareWidth / 2), 
         cy: center.y - (outerSquareWidth / 2) + (catetWidth * 3),
@@ -48,7 +48,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('darkSilver'),
     });
 
-    const big_Triangle_2 = createRightTriangle({
+    const big_Triangle_2 = PIXI_Wrapper.createRightTriangle({
         label: 'big_Triangle_2',
         cx: center.x + (outerSquareWidth / 2), 
         cy: center.y - (outerSquareWidth / 2),
@@ -58,7 +58,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         angle: 180,
     });
 
-    const long_rect_1 = createRectangle({
+    const long_rect_1 = PIXI_Wrapper.createRectangle({
         label: 'long_rect_1',
         x: center.x - catetWidth, 
         y: center.y - catetWidth,
@@ -67,7 +67,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('darkSilver'),
     });
 
-    const triangle_3 = createRightTriangle({
+    const triangle_3 = PIXI_Wrapper.createRightTriangle({
         label: 'triangle_3',
         cx: center.x, 
         cy: center.y + catetWidth,
@@ -77,7 +77,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         angle: -135,
     });
 
-    const square_1 = createRectangle({
+    const square_1 = PIXI_Wrapper.createRectangle({
         label: 'square_1',
         x: center.x, 
         y: center.y,
@@ -86,7 +86,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('lightCarbon'),
     });
 
-    const square_2 = createRectangle({
+    const square_2 = PIXI_Wrapper.createRectangle({
         label: 'square_2',
         x: center.x + catetWidth, 
         y: center.y - catetWidth,
@@ -95,7 +95,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('brightSilver'),
     });
 
-    const square_3 = createRectangle({
+    const square_3 = PIXI_Wrapper.createRectangle({
         label: 'square_3',
         x: center.x + catetWidth, 
         y: center.y,
@@ -104,7 +104,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('darkSilver'),
     });
 
-    const square_4 = createRectangle({
+    const square_4 = PIXI_Wrapper.createRectangle({
         label: 'square_4',
         x: center.x + catetWidth, 
         y: center.y + catetWidth,
@@ -113,7 +113,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('lightCarbon'),
     });
 
-    const semi_circle_1 = createSemiCircle({
+    const semi_circle_1 = PIXI_Wrapper.createSemiCircle({
         label: 'semi_circle_1',
         cx: center.x + radius,
         cy: center.y - radius,
@@ -122,7 +122,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
 
     });
 
-    const semi_circle_2 = createSemiCircle({
+    const semi_circle_2 = PIXI_Wrapper.createSemiCircle({
         label: 'semi_circle_2',
         cx: center.x + radius,
         cy: center.y + radius,
@@ -131,7 +131,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
     });
 
 
-    const semi_circle_3 = createSemiCircle({
+    const semi_circle_3 = PIXI_Wrapper.createSemiCircle({
         label: 'semi_circle_3',
         cx: center.x + (radius * 3),
         cy: center.y + radius,
@@ -139,7 +139,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('lightCarbon'),
     });
 
-    const semi_circle_4 = createSemiCircle({
+    const semi_circle_4 = PIXI_Wrapper.createSemiCircle({
         label: 'semi_circle_4',
         cx: center.x + (radius * 3),
         cy: center.y + (radius * 3),
@@ -148,7 +148,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         angle: 90,
     });
 
-    const circle_1 = createCircle({
+    const circle_1 = PIXI_Wrapper.createCircle({
         label: 'circle_1',
         cx: center.x + (radius * 3),
         cy: center.y - radius,
@@ -156,7 +156,7 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
         fillColor: getColor('lightCarbon'),
     });
 
-    const circle_2 = createCircle({
+    const circle_2 = PIXI_Wrapper.createCircle({
         label: 'circle_2',
         cx: center.x + (radius * 3),
         cy: center.y - (radius * 3),
