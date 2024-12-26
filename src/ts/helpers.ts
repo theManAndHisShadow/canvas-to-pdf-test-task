@@ -50,6 +50,57 @@ export function decimal2RGBString(decimal: number): string {
 
 
 /**
+ * Превращает HTML изображение в HTML холст, после чего возвращает результат
+ * @param image - HTML изображение
+ * @returns - готовый холст с изображдением
+ */
+export function imageToCanvas(image: HTMLImageElement): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas 2D context not available');
+    context.drawImage(image, 0, 0);
+    return canvas;
+}
+
+
+
+/**
+ * Превращает холст в Uint8Array
+ * @param canvas - HTML холст
+ * @returns - последовательность чисел в виде Uint8Array
+ */
+export function canvasToUint8Array(canvas: HTMLCanvasElement): Uint8Array {
+    const dataUrl = canvas.toDataURL('image/png');
+    const base64 = dataUrl.split(',')[1];
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        array[i] = binary.charCodeAt(i);
+    }
+    return array;
+}
+
+
+
+/**
+ * Превращает Uint8Array в base64 строку
+ * @param uint8Array 
+ * @returns 
+ */
+export function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+    // Преобразуем Uint8Array в строку
+    const binaryString = Array.from(uint8Array)
+        .map(byte => String.fromCharCode(byte))
+        .join('');
+    // Кодируем строку в Base64
+    return btoa(binaryString);
+}
+
+
+
+/**
  * Выводит отладочную инфо в консоль в удобнмо формате
  * @param status - статус сообщения
  * @param messageText - текст сообщения
