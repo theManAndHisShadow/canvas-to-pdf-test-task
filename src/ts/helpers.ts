@@ -219,6 +219,8 @@ export function getColor(query: string): string {
 
         darkSilver:   'rgba(96, 96, 96, 1)',
         brightSilver: 'rgba(212, 212, 212, 1)',
+
+        white: 'rgba(255, 255, 255, 1)',
     }
 
     return /rgba/.test(query) ? Object.entries(colors).find(([key, value]) => value === query)?.[0] : colors[query];
