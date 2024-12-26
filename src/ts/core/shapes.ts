@@ -1,6 +1,6 @@
 import { degrees2radians } from "../helpers";
 
-import "./patches/patched-classes.ts";
+import "./patches/patched-classes";
 import * as PIXI from "pixi.js-legacy";
 
 
