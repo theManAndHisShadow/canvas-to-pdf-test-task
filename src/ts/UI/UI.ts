@@ -31,7 +31,7 @@ export default class UI {
                   type: 'dropdown-list',
                   label: 'Select scene',
                   classNames: ['app-ui__dropdown-list'],
-                  valuesList: ['showcase', 'composition'],
+                  valuesList: ['showcase', 'random', 'composition', 'perspective'],
                   value: 'showcase',
                   settingsKey: 'selectedScene',
             });

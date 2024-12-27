@@ -1,10 +1,10 @@
-import { Container } from "pixi.js-legacy";
 import { getColor } from "../helpers";
+import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
 const createShowcaseScene = function(params: {centerPoint: {x: number, y: number}}){
     const center = params.centerPoint;
-    const sceneContainer = new Container();
+    const sceneContainer = new PIXI.Container();
 
     const triangle_1 = PIXI_Wrapper.createEquilateralTriangle({
         label: 'triangle_1',

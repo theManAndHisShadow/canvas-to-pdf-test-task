@@ -9,10 +9,14 @@ import json2html from "./libs/json2html/json2html.min";
 
 // импортируем подготовленные сцены
 import createShowcaseScene from "./scenes/showcase.scene";
+import createRandomShapesScene from "./scenes/random.scene";
 import createCompositionScene from "./scenes/composition.scene";
+import createPerspectiveScene from "./scenes/perspective.scene";
 
 import pixi2skia from "./core/pixi2skia/convert";
 import CanvasKitInit from "canvaskit-wasm";
+
+const preloader = document.querySelector('#app__global-preloder');
 
 // локальная хелпер функция для отрисовки объекта в html
 const convertObjectToHTML = (objectToRender: object) => {
@@ -89,12 +93,20 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
 
     // Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
-    const scenes: Record<string, any> = {
+    const scenes: Record<string, PIXI.Container> = {
         showcase: createShowcaseScene({
             centerPoint: canvasCenterPoint,
         }),
 
+        random: createRandomShapesScene({
+            centerPoint: canvasCenterPoint,
+        }),
+
         composition: createCompositionScene({
+            centerPoint: canvasCenterPoint,
+        }),
+
+        perspective: createPerspectiveScene({
             centerPoint: canvasCenterPoint,
         }),
     };
@@ -102,10 +114,6 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // 
     let selectedName = JSON.parse(localStorage.getItem('selectedScene'));
     let selectedScene: PIXI.Container = scenes[selectedName];
-
-    // Инициализация ранее выбранной сцены
-    mainContainer.addChild(selectedScene);
-
 
     // Добавляем интерактивность к объектам всех сцен
     Object.values(scenes).forEach(scene => {
@@ -131,7 +139,7 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
                 } else if (object instanceof PIXI.Graphics) {
                     data["class"] = "PIXI.Graphics";
                     // так конечно лучше не делать, но в данном случае я получаю цвет, а не назначаю
-                    data.fillColor = getColor(decimal2RGBString((object as any)._fillStyle.color));
+                    data.fillColor = getColor(decimal2RGBString((object as any)._fillStyle.color)) || decimal2RGBString((object as any)._fillStyle.color);
                     data.lineColor = getColor(decimal2RGBString((object as any)._lineStyle.color));
                 } else if (object instanceof PIXI.Container) {
                     data["class"] = "PIXI.Container";
@@ -149,6 +157,10 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
             });
         }
     });
+
+
+    // Инициализация ранее выбранной сцены
+    mainContainer.addChild(selectedScene);
 
 
     // Добавляем возможность выбрать сцену из списка доступных
@@ -177,13 +189,18 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Добавляем контейнер на уровень (холст)
     app.stage.addChild(mainContainer);
 
-
     // После успешной загрузки используем canvasKit
     pixi2skia({
         from: mainContainer,
         to: skiaCanvas,
         use: canvasKit,
     }).catch(console.error);
+
+    // Убираем слой с анимацией загрузки как только всё холсты будут инициализированы и первая конвертация пройдёт успешно
+    preloader.classList.add('hidden');
+    setTimeout(() => {
+        preloader.remove();
+    }, 500);
 
     debugLog('ok', 'the application is fully launched and ready to work');
 }).catch((error) => {
