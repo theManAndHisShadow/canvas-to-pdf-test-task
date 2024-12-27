@@ -9,6 +9,7 @@ import json2html from "./libs/json2html/json2html.min";
 
 // импортируем подготовленные сцены
 import createShowcaseScene from "./scenes/showcase.scene";
+import createRandomShapesScene from "./scenes/random.scene";
 import createCompositionScene from "./scenes/composition.scene";
 import createPerspectiveScene from "./scenes/perspective.scene";
 
@@ -94,6 +95,10 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
     const scenes: Record<string, any> = {
         showcase: createShowcaseScene({
+            centerPoint: canvasCenterPoint,
+        }),
+
+        random: createRandomShapesScene({
             centerPoint: canvasCenterPoint,
         }),
 
