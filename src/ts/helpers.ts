@@ -1,3 +1,16 @@
+/**
+ * Возвращает случайное число из диапазона (min, max)
+ * @param min - Начало диапазона
+ * @param max - конец диапазона (включительно)
+ * @returns - случайное число
+ */
+export function getRandomNumber(min: number, max: number): number {
+    let randomNUmber = min + Math.random() * (max + 1 - min);
+  
+    return Math.floor(randomNUmber);
+}
+
+
 
 /**
  * Переводит градусы в радианы
@@ -219,6 +232,10 @@ export function getColor(query: string): string {
 
         darkSilver:   'rgba(96, 96, 96, 1)',
         brightSilver: 'rgba(212, 212, 212, 1)',
+
+        salad:        'rgba(102, 255, 12, 1)',
+        chocolate:    'rgba(107, 47, 2, 1)',
+        blueberry:    'rgba(106, 0, 255, 1)',
 
         white: 'rgba(255, 255, 255, 1)',
     }
