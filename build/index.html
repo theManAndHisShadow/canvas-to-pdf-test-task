@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!-- Глобальный стиль проекта -->
-        <link rel="stylesheet" href="css/global.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>canvas-to-pdf-test-task</title>
-    <script defer src="js/bundle.js"></script></head>
+    <!-- Глобальный стиль проекта -->
+    <link rel="stylesheet" href="css/global.css">
 
-    <body>
-        <div id="app-root">
-            <canvas id="app__pixijs-canvas"></canvas>
-            <canvas id="app__skia-canvas"></canvas>
+    <title>canvas-to-pdf-test-task</title>
+<script defer src="js/bundle.js"></script></head>
+
+<body>
+    <div id="app-root">
+        <div id="app__global-preloder">
+            <div class="lds-ripple">
+                <div></div>
+                <div></div>
+            </div>
         </div>
-    </body>
+        <canvas id="app__pixijs-canvas"></canvas>
+        <canvas id="app__skia-canvas"></canvas>
+    </div>
+</body>
+
 </html>
