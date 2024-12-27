@@ -93,7 +93,7 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
 
     // Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
-    const scenes: Record<string, any> = {
+    const scenes: Record<string, PIXI.Container> = {
         showcase: createShowcaseScene({
             centerPoint: canvasCenterPoint,
         }),
@@ -114,10 +114,6 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // 
     let selectedName = JSON.parse(localStorage.getItem('selectedScene'));
     let selectedScene: PIXI.Container = scenes[selectedName];
-
-    // Инициализация ранее выбранной сцены
-    mainContainer.addChild(selectedScene);
-
 
     // Добавляем интерактивность к объектам всех сцен
     Object.values(scenes).forEach(scene => {
@@ -163,6 +159,10 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     });
 
 
+    // Инициализация ранее выбранной сцены
+    mainContainer.addChild(selectedScene);
+
+
     // Добавляем возможность выбрать сцену из списка доступных
     ui.elements.selectedScene.addEventListener('change', () => {
         // Очищаем сцену от предыдущих элементов
@@ -198,6 +198,9 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
 
     // Убираем слой с анимацией загрузки как только всё холсты будут инициализированы и первая конвертация пройдёт успешно
     preloader.classList.add('hidden');
+    setTimeout(() => {
+        preloader.remove();
+    }, 500);
 
     debugLog('ok', 'the application is fully launched and ready to work');
 }).catch((error) => {
