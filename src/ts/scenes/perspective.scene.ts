@@ -1,5 +1,5 @@
-import * as PIXI from "pixi.js-legacy";
 import { getColor } from "../helpers";
+import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
 

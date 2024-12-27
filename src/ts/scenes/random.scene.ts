@@ -1,10 +1,10 @@
-import { Container } from "pixi.js-legacy";
 import { getColor, getRandomNumber } from "../helpers";
+import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
 const createRandomShapesScene = function(params: {centerPoint: {x: number, y: number}}){
     // Глобальные переменные сцены
-    const sceneContainer = new Container();
+    const sceneContainer = new PIXI.Container();
     const center = params.centerPoint;                  // Центер сцены
 
     const globalWidth = 400;                            // Размер всего доступного поля
