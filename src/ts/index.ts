@@ -162,6 +162,9 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Инициализация ранее выбранной сцены
     mainContainer.addChild(selectedScene);
 
+    ui.elements.exportButton.addEventListener('click', () => {
+        console.log('`export-button` is clicked right now!');
+    });
 
     // Добавляем возможность выбрать сцену из списка доступных
     ui.elements.selectedScene.addEventListener('change', () => {

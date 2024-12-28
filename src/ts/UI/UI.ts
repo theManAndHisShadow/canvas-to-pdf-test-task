@@ -27,6 +27,13 @@ export default class UI {
             // в данном случае root - локальный корень (внешний элемент, содержащий весь блок панели)
             this.root = container;
 
+            const exportButton = new UIElement({
+                  type: 'button',
+                  label: 'Export as PDF',
+                  value: 'Downlaod',
+                  classNames: ['app-ui__export-button'],
+            });
+
             const selectedScene = new UIElement({
                   type: 'dropdown-list',
                   label: 'Select scene',
@@ -57,6 +64,7 @@ export default class UI {
 
             // записываем их в экземляр класса
             this.elements = {
+                exportButton,
                 selectedScene,
                 mainContainerInfo,
                 mouseTarget,
@@ -68,6 +76,7 @@ export default class UI {
 
             // добавляем в внутреннией контейнер панели
             containerInner.appendChild(title);
+            containerInner.appendChild(this.elements.exportButton.body);
             containerInner.appendChild(this.elements.selectedScene.body);
             containerInner.appendChild(this.elements.mainContainerInfo.body);      
             containerInner.appendChild(this.elements.mouseTarget.body);
