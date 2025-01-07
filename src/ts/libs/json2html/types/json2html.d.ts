@@ -14,6 +14,8 @@ declare type ThemeLibrary = {
     }
 };
 
+declare type ErrorHandler = (error: Error) => void;
+
 /**
  * Renders JSON string in colored and formatted HTML block.
  * @param params.json JSON string to render
