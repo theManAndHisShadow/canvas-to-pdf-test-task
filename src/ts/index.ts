@@ -1,4 +1,4 @@
-import { debugLog, decimal2RGBString, getColor } from "./helpers";
+import { debugLog, decimal2RGBString, getColor, getFormattedDate } from "./helpers";
 
 import * as PIXI from 'pixi.js-legacy';
 import UI from "./UI/UI";
@@ -14,13 +14,13 @@ import createCompositionScene from "./scenes/composition.scene";
 import createPerspectiveScene from "./scenes/perspective.scene";
 
 import pixi2skia from "./core/pixi2skia/convert";
-import CanvasKitInit from "canvaskit-wasm";
+import { CanvasKit } from "../ts/libs/canvaskit-wasm/types";
+import CanvasKitInit from "../ts/libs/canvaskit-wasm/canvaskit.js";
 
 const preloader = document.querySelector('#app__global-preloder');
 
 // локальная хелпер функция для отрисовки объекта в html
 const convertObjectToHTML = (objectToRender: object) => {
-    //@ts-ignore
     return json2html({
         json: JSON.stringify(objectToRender),
         theme: draculaV2Theme,
@@ -29,7 +29,7 @@ const convertObjectToHTML = (objectToRender: object) => {
     });
 };
 
-CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
+CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: CanvasKit) => {
     debugLog("ok", "`canvaskit.wasm` successfully loaded to project");
     debugLog("ok", "`CanvasKit` instance is accessible within the given scope");
 
@@ -166,6 +166,51 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
         console.log('`export-button` is clicked right now!');
     });
 
+    /**
+     * Обёртка для pixi2skia.
+     * Содержит в себе обработчик при завершении конвертации, 
+     * а обработчик в свою очередь внутри скачивает pdf версию холста по нажатию на кнопку
+     */
+    const pixi2skiaWrapper = () => {
+        pixi2skia({
+            from: mainContainer,
+            to: skiaCanvas,
+            use: canvasKit,
+            onComplete: convertData => {
+                const pageWidth = skiaCanvas.width;
+                const pageHeight = skiaCanvas.height;
+
+                // В процессе конвертации просиходит захват итогового холста,
+                // объект захвата можно переконвертировать в PDF
+                // Функция конвертации возвращает поток Uint8Array, который сразу на месте можно превратить в Blob
+                const fileUint8Array = canvasKit.ConvertToPDF(convertData.captured, pageWidth, pageHeight);
+                const pdfStream = new Blob([fileUint8Array], { type: 'application/pdf' });
+
+                debugLog('ok', 'skia canvas successfully converted to PDF');
+
+                // Преобразуем Blob в URL для скачивания
+                const pdfUrl = URL.createObjectURL(pdfStream);
+
+                let fileName = `skia_canvas_${getFormattedDate()}.pdf`;
+
+                // Скачиваем PDF файл
+                const downloadLink = document.createElement('a');
+                      downloadLink.href = pdfUrl;
+                      downloadLink.download = fileName;
+                
+                // если накидывать событие через addEventListener, то кнопка будет содержать несколько обработчиков событий
+                // и при переключении сцены и нажати на кнопку, будут срабатывать все обработчики для всех посещённых сцен
+                // коненчо можно запариться с удалением событий, но можно просто перезаписыать каждый раз,
+                // ведь у on + eventName именно такое поведение, что сейчас очень к стати!)
+                ui.elements.exportButton.body.onclick = () => {
+                    downloadLink.click();
+
+                    debugLog('ok', `\`${fileName}\` is downloaded`);
+                };
+            },
+        }).catch(console.error);
+    };
+
     // Добавляем возможность выбрать сцену из списка доступных
     ui.elements.selectedScene.addEventListener('change', () => {
         // Очищаем сцену от предыдущих элементов
@@ -178,13 +223,8 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
         // передобавляем сцену в главный окнтейнер
         mainContainer.addChild(selectedScene);
 
-
-        // После успешной загрузки используйте canvasKit
-        pixi2skia({
-            from: mainContainer,
-            to: skiaCanvas,
-            use: canvasKit,
-        }).catch(console.error);
+        // После успешной загрузки canvasKit - вызываем для конвертации pixi в skia и скачивания pdf версии холста
+        pixi2skiaWrapper();
 
         debugLog('ok', 'scene successfully changed');
     });
@@ -192,12 +232,8 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     // Добавляем контейнер на уровень (холст)
     app.stage.addChild(mainContainer);
 
-    // После успешной загрузки используем canvasKit
-    pixi2skia({
-        from: mainContainer,
-        to: skiaCanvas,
-        use: canvasKit,
-    }).catch(console.error);
+    // После успешной загрузки canvasKit - вызываем для конвертации pixi в skia и скачивания pdf версии холста
+    pixi2skiaWrapper();
 
     // Убираем слой с анимацией загрузки как только всё холсты будут инициализированы и первая конвертация пройдёт успешно
     preloader.classList.add('hidden');
@@ -206,6 +242,6 @@ CanvasKitInit({ locateFile: (file) => `../js/${file}` }).then((canvasKit) => {
     }, 500);
 
     debugLog('ok', 'the application is fully launched and ready to work');
-}).catch((error) => {
+}).catch((error: any) => {
     console.error('Ошибка загрузки CanvasKit:', error);
 });
