@@ -1,6 +1,6 @@
 import { debugLog, getColor, radians2degrees, imageToCanvas, canvasToUint8Array, uint8ArrayToBase64 } from "../../helpers";
 import * as PIXI from "pixi.js-legacy";
-import { Canvas, CanvasKit, Path } from "canvaskit-wasm";
+import { CanvasKit, Canvas, Rect, SkPicture } from "../../../ts/libs/canvaskit-wasm/types";
 import { drawCircle, drawPolygon, drawRectangle } from "./shapes";
 
 
@@ -118,7 +118,7 @@ function _renderPixiContainer(container: PIXI.Container, canvas: Canvas, canvasK
         if (containerItem instanceof PIXI.Sprite) {
             // N.B: Пока что зесь возникают проблемы с отрисовкой
             // Поэтому я временно отключил отрисовку cпрайтов
-            // renderSprite(containerItem, canvas, canvasKit);
+            // _renderPixiSprite(containerItem, canvas, canvasKit);
         } else if (containerItem instanceof PIXI.Graphics) {
             _renderPixiGraphics(containerItem, canvas, canvasKit);
         } else if (containerItem instanceof PIXI.Container) {
@@ -204,22 +204,56 @@ function _renderPixiSprite(sprite: PIXI.Sprite, canvas: Canvas, canvasKit: Canva
  * @param params.to - На каком холсте отрисовать данные из SKIA
  * @param params.use - ссылка на готовый к работе объект модуля canvaskit
  */
-export default async function pixi2skia(params: { from: PIXI.Container, to: HTMLCanvasElement, use: CanvasKit}) {
+export default async function pixi2skia(params: { from: PIXI.Container, to: HTMLCanvasElement, use: CanvasKit, onComplete?: (data: any) => void}) {
     let canvasKit = params.use;
 
     // Создаём некоторые важные объекты из canvaskit
     const surface = canvasKit.MakeCanvasSurface(params.to);
     const paint = new canvasKit.Paint();
-    paint.setAntiAlias(true);
+    paint.setAntiAlias(true);;
 
     // Процесс отрисовки 
-    surface.drawOnce(canvas => {
+    surface.drawOnce((canvas: Canvas) => {
         // Очищаем весь холст
         canvas.clear(canvasKit.parseColorString(getColor('carbon')));
 
+        // Получаем размеры холста
+        const sizes = canvas.getSizes();
+
+        // выделяем олатсь захвата
+        let bounds: Rect = canvasKit.LTRBRect(0, 0, sizes.width, sizes.height);
+
+        // Создаём объект, которы йбудет вести запись команд отрисовки
+        let recorder = new canvasKit.PictureRecorder();
+
+        // резльутат - объект записи
+        let captureCanvas = recorder.beginRecording(bounds);
+
         // Отрисовываем корневой контейнер из Pixi
-        // Далее функция сама отрисоует всё содержимрое контейнера
+        // Далее функция сама отрисует всё содержимрое контейнера
+        // в качестве цели, куда отрисовываем указываем видимый холст SkCanvas (canvas)
         _renderPixiContainer(params.from, canvas, canvasKit);
+
+        // дублируем для захвата команд отрисовки Skia
+        // Необходимо для конвертации SkCanvas в SkPDF
+        // в качестве цели, куда отрисовать указываем специальный холст (captureCanvas) для захвата команд
+        _renderPixiContainer(params.from, captureCanvas, canvasKit);
+
+        debugLog('ok', 'pixi canvas successfully converted to skia canvas');
+
+        // Получаем последовтальность кооманд и трансформаций
+        let capture: SkPicture = recorder.finishRecordingAsPicture();
+
+        // если запись создалась успешно и есть коллбек - вызываем коллбек и передаём данные по конвертации
+        if (capture) {
+            if(params.onComplete) {
+                params.onComplete({
+                    captured: capture,
+                });
+            }
+        } else {    
+            debugLog('err', '`capture` value is incorrect')
+        }
     });
 
     // очищаем ресурсы
