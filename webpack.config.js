@@ -65,7 +65,8 @@ module.exports = (env) => {
             new CopyWebpackPlugin({
                 patterns: [
                     {
-                        from: 'node_modules/canvaskit-wasm/bin/canvaskit.wasm',
+                        // from: 'node_modules/canvaskit-wasm/bin/canvaskit.wasm',
+                        from: './src/ts/libs/canvaskit-wasm/canvaskit.wasm',          // В собранном проекте используется кастомная версия библиотеки
                         to: path.resolve(__dirname, './build/js/', 'canvaskit.wasm')  // Путь, куда будет скопирован файл
                     }
                 ]
