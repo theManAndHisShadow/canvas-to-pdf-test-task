@@ -242,3 +242,24 @@ export function getColor(query: string): string {
 
     return /rgba/.test(query) ? Object.entries(colors).find(([key, value]) => value === query)?.[0] : colors[query];
 }
+
+
+
+/**
+ * Returns formatted current date in 'yearMonthDay_hourMinutesSeconds' fromat.
+ * @returns 
+ */
+export function getFormattedDate() {
+    const now = new Date();
+
+    const pad = (num: number) => String(num).padStart(2, '0');
+
+    const day = pad(now.getDate());
+    const month = pad(now.getMonth() + 1); // Месяцы начинаются с 0
+    const year = now.getFullYear();
+    const hours = pad(now.getHours());
+    const minutes = pad(now.getMinutes());
+    const seconds = pad(now.getSeconds());
+
+    return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+}
