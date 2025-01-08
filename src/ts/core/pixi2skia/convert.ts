@@ -1,7 +1,6 @@
-import { debugLog, getColor, radians2degrees, imageToCanvas, canvasToUint8Array, uint8ArrayToBase64 } from "../../helpers";
+import { debugLog, getColor, radians2degrees, decimal2RGBA } from "../../helpers";
 import * as PIXI from "pixi.js-legacy";
 import { CanvasKit, Canvas, Rect, SkPicture, Image } from "../../../ts/libs/canvaskit-wasm/types";
-import { drawCircle, drawPolygon, drawRectangle } from "./shapes";
 
 
 
@@ -64,6 +63,122 @@ function _extractPixiGraphicsData(graphics: PIXI.Graphics) {
 
 
 /**
+ * Рисует прямоугольник на холсте
+ *
+ * @param canvas - Объект SkCanvas, на котором будет нарисован прямоугольник
+ * @param rect - Объект PIXI.Rectangle, содержащий координаты x, y, ширину и высоту прямоугольника
+ * @param styles - Объект со стилями, включая свойства fillColor, lineColor и lineWidth
+ * @param canvasKit - Экземпляр CanvasKit, используемый для отрисовки
+ */
+export function _renderRectangle(canvas: Canvas, rect: PIXI.Rectangle, styles: any, canvasKit: CanvasKit) {
+    const { x, y, width, height } = rect;
+
+    const path = new canvasKit.Path();
+    path.moveTo(x, y);
+    path.lineTo(x + width, y);
+    path.lineTo(x + width, y + height);
+    path.lineTo(x, y + height);
+    path.close();
+
+    const fillPaint = new canvasKit.Paint();
+    fillPaint.setStyle(canvasKit.PaintStyle.Fill);
+    fillPaint.setAntiAlias(true);
+    fillPaint.setColor(canvasKit.Color(...decimal2RGBA(styles.fillColor)));
+
+    const strokePaint = new canvasKit.Paint();
+    strokePaint.setStyle(canvasKit.PaintStyle.Stroke);
+    strokePaint.setAntiAlias(true);
+    strokePaint.setColor(canvasKit.Color(...decimal2RGBA(styles.lineColor)));
+    strokePaint.setStrokeWidth(styles.lineWidth);
+
+    // Рисуем заливку
+    canvas.drawPath(path, fillPaint);
+
+    // Рисуем обводку
+    if (styles.lineWidth > 0) {
+        canvas.drawPath(path, strokePaint);
+    }
+}
+
+
+
+/**
+ * Рисует круг на холсте
+ *
+ * @param canvas - Объект SkCanvas, на котором будет нарисован круг
+ * @param circle - Объект PIXI.Circle, содержащий координаты x, y и радиус круга
+ * @param styles - Объект со стилями, включая свойства fillColor, lineColor и lineWidth
+ * @param canvasKit - Экземпляр CanvasKit, используемый для отрисовки
+ */
+export function _renderCircle(canvas: Canvas, circle: PIXI.Circle, styles: any, canvasKit: CanvasKit) {
+    const path = new canvasKit.Path();
+    path.addCircle(circle.x, circle.y, circle.radius);
+
+    const fillPaint = new canvasKit.Paint();
+    fillPaint.setStyle(canvasKit.PaintStyle.Fill);
+    fillPaint.setAntiAlias(true);
+    fillPaint.setColor(canvasKit.Color(...decimal2RGBA(styles.fillColor)));
+
+    const strokePaint = new canvasKit.Paint();
+    strokePaint.setStyle(canvasKit.PaintStyle.Stroke);
+    strokePaint.setAntiAlias(true);
+    strokePaint.setColor(canvasKit.Color(...decimal2RGBA(styles.lineColor)));
+    strokePaint.setStrokeWidth(styles.lineWidth);
+
+    // Рисуем заливку
+    canvas.drawPath(path, fillPaint);
+
+    // Рисуем обводку
+    if (styles.lineWidth > 0) {
+        canvas.drawPath(path, strokePaint);
+    }
+}
+
+
+
+/**
+ * Рисует многоугольник на холсте
+ *
+ * @param canvas - Объект SkCanvas, на котором будет нарисован многоугольник
+ * @param points - Массив чисел, представляющий координаты вершин многоугольника в формате [x1, y1, x2, y2, ...]
+ * @param styles - Объект со стилями, включая свойства fillColor, lineColor, lineWidth и isClosed
+ * @param canvasKit - Экземпляр CanvasKit, используемый для отрисовки
+ */
+export function _renderPolygon(canvas: Canvas, points: number[], styles: any, canvasKit: CanvasKit) {
+    const path = new canvasKit.Path();
+    path.moveTo(points[0], points[1]);
+
+    for (let i = 2; i < points.length; i += 2) {
+        path.lineTo(points[i], points[i + 1]);
+    }
+
+    if (styles.isClosed) path.close();
+
+    // Рисуем заливку, только если задан цвет заливки
+    if (styles.fillColor) {
+        const fillPaint = new canvasKit.Paint();
+        fillPaint.setStyle(canvasKit.PaintStyle.Fill);
+        fillPaint.setAntiAlias(true);
+        fillPaint.setColor(canvasKit.Color(...decimal2RGBA(styles.fillColor)));
+        canvas.drawPath(path, fillPaint);
+    }
+
+    // Рисуем обводку
+    if (styles.lineWidth > 0) {
+        const strokePaint = new canvasKit.Paint();
+        strokePaint.setStyle(canvasKit.PaintStyle.Stroke);
+        strokePaint.setAntiAlias(true);
+        strokePaint.setColor(canvasKit.Color(...decimal2RGBA(styles.lineColor)));
+        strokePaint.setStrokeWidth(styles.lineWidth);
+
+        canvas.drawPath(path, strokePaint);
+    }
+}
+
+
+
+
+/**
  * Отрисовывает графику из PIXI внутри холста SKIA
  * @param graphics - экземпляр графики PIXI
  * @param canvas - ссылка на объект холста
@@ -86,11 +201,11 @@ function _renderPixiGraphics(graphics: PIXI.Graphics, canvas: Canvas, canvasKit:
 
         // В завиисмости от формы графики рисуем фигуру в SKIA
         if (type === PIXI.SHAPES.RECT) {
-            drawRectangle(canvas, shape as PIXI.Rectangle, style, canvasKit);
+            _renderRectangle(canvas, shape as PIXI.Rectangle, style, canvasKit);
         } else if (type === PIXI.SHAPES.CIRC) {
-            drawCircle(canvas, shape as PIXI.Circle, style, canvasKit);
+            _renderCircle(canvas, shape as PIXI.Circle, style, canvasKit);
         } else if (type === PIXI.SHAPES.POLY) {
-            drawPolygon(canvas, (shape as PIXI.Polygon).points, style, canvasKit);
+            _renderPolygon(canvas, (shape as PIXI.Polygon).points, style, canvasKit);
         } else {
             debugLog('warn', 'Unsupported shape type');
             console.log('shape', type, shape);
