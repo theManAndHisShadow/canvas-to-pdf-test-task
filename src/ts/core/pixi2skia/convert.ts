@@ -56,7 +56,7 @@ function _extractPixiGraphicsData(graphics: PIXI.Graphics) {
         return {
             type,
             shape,
-            style: { fillColor, lineColor, lineWidth },
+            style: { fillColor, lineColor, lineWidth, isClosed: graphics.isClosed },
         };
     });
 }
