@@ -66,9 +66,6 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         height: height,
     });
 
-    // Добавляем в HTML дерево холст
-    appRoot.appendChild(app.view as HTMLCanvasElement);
-
     // создлаём объект интерфейса
     const ui = new UI(appRootSelector, 350, height);
 
