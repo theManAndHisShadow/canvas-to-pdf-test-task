@@ -304,11 +304,11 @@ export function createRightTriangle(params: {
  * @returns - спрайт
  */
 export function createSprite(
+    src: string,
     x: number, 
     y: number, 
     width: number, 
     height: number, 
-    src: string
 ): PIXI.Sprite {
     const spriteTexture = PIXI.Texture.from(src);
     const windowSprite = new PIXI.Sprite(spriteTexture);
@@ -318,6 +318,9 @@ export function createSprite(
 
     windowSprite.x = x;
     windowSprite.y = y;
+
+    let splitted = src.split('/');
+    windowSprite.label = splitted[splitted.length - 1];
 
     return windowSprite;
 }

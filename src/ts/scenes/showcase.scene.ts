@@ -2,9 +2,21 @@ import { getColor } from "../helpers";
 import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
-const createShowcaseScene = function(params: {centerPoint: {x: number, y: number}}){
+const createShowcaseScene = function(params: {centerPoint: {x: number, y: number}, width: number, height: number, background: string}){
     const center = params.centerPoint;
     const sceneContainer = new PIXI.Container();
+
+    // добавляем подложку-фон для сцены и сразу интегрируем её в структуру сцены
+    const sceneContainerBackground = PIXI_Wrapper.createRectangle({
+            label: 'scene_background',
+            x: 0, 
+            y: 0, 
+            width: params.width, 
+            height: params.height,
+            fillColor: params.background,
+        });
+    
+    sceneContainer.addChild(sceneContainerBackground);
 
     const triangle_1 = PIXI_Wrapper.createEquilateralTriangle({
         label: 'triangle_1',
@@ -37,7 +49,7 @@ const createShowcaseScene = function(params: {centerPoint: {x: number, y: number
         borderColor: getColor('brightRed')
     });
 
-    const sprite_1 = PIXI_Wrapper.createSprite(167, 48, 254, 196, '../assets/window.png');
+    const sprite_1 = PIXI_Wrapper.createSprite('../assets/window.png', 167, 48, 254, 196);
 
     sceneContainer.addChild(sprite_1);
     sceneContainer.addChild(triangle_1);

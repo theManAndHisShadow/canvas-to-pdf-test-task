@@ -64,7 +64,6 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         view: pixijsCanvas,
         width: width,
         height: height,
-        background: getColor('carbon'),
     });
 
     // Добавляем в HTML дерево холст
@@ -91,24 +90,21 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     mainContainer.on('childAdded', mainContainerUpdateHandler);
     mainContainer.on('childRemoved', mainContainerUpdateHandler);
 
+    // стандартные параметры для всех сцен - ширрина и фон у всех одинаковый
+    const defaultSceneParams = {
+        width,
+        height,
+        centerPoint: canvasCenterPoint,
+        background: getColor('carbon'),
+    };
+
     // Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
     const scenes: Record<string, PIXI.Container> = {
-        showcase: createShowcaseScene({
-            centerPoint: canvasCenterPoint,
-        }),
-
-        random: createRandomShapesScene({
-            centerPoint: canvasCenterPoint,
-        }),
-
-        composition: createCompositionScene({
-            centerPoint: canvasCenterPoint,
-        }),
-
-        perspective: createPerspectiveScene({
-            centerPoint: canvasCenterPoint,
-        }),
+        showcase:    createShowcaseScene(defaultSceneParams),
+        random:      createRandomShapesScene(defaultSceneParams),
+        composition: createCompositionScene(defaultSceneParams),
+        perspective: createPerspectiveScene(defaultSceneParams),
     };
 
     // 
