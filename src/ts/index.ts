@@ -9,7 +9,7 @@ import json2html from "./libs/json2html/json2html.min";
 
 // импортируем подготовленные сцены
 import createShapeseScene from "./scenes/shapes.scene";
-import createRandomShapesScene from "./scenes/random.scene";
+import createQRCodeScene from "./scenes/qr_code.scene";
 import createCompositionScene from "./scenes/composition.scene";
 import createPerspectiveScene from "./scenes/perspective.scene";
 import createSpritesScene from "./scenes/sprites.scene";
@@ -100,11 +100,11 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     // Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
     const scenes: Record<string, PIXI.Container> = {
-        shapes:    createShapeseScene(defaultSceneParams),
-        random:      createRandomShapesScene(defaultSceneParams),
-        composition: createCompositionScene(defaultSceneParams),
-        perspective: createPerspectiveScene(defaultSceneParams),
-        sprites:     createSpritesScene(defaultSceneParams),
+        shapes:       createShapeseScene(defaultSceneParams),
+        qr_code:      createQRCodeScene(defaultSceneParams),
+        composition:  createCompositionScene(defaultSceneParams),
+        perspective:  createPerspectiveScene(defaultSceneParams),
+        sprites:      createSpritesScene(defaultSceneParams),
     };
 
     // 

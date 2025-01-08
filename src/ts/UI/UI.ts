@@ -38,8 +38,8 @@ export default class UI {
                   type: 'dropdown-list',
                   label: 'Select scene',
                   classNames: ['app-ui__dropdown-list'],
-                  valuesList: ['shapes', 'sprites', 'random', 'composition', 'perspective'],
-                  value: 'showcase',
+                  valuesList: ['shapes', 'sprites', 'qr_code', 'composition', 'perspective'],
+                  value: 'shapes',
                   settingsKey: 'selectedScene',
             });
 
