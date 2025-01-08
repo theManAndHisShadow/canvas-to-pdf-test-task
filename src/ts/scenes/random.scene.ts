@@ -7,8 +7,8 @@ const createRandomShapesScene = function(params: {centerPoint: {x: number, y: nu
     const sceneContainer = new PIXI.Container();
     const center = params.centerPoint;                  // Центер сцены
 
-    const globalWidth = 400;                            // Размер всего доступного поля
-    const cellSize = 50;                                // Размер ячейки
+    const globalWidth = 360;                            // Размер всего доступного поля
+    const cellSize = 45;                                // Размер ячейки
     const rows = globalWidth / cellSize;                // Количество строк
     const columns = globalWidth / cellSize;             // количество колонок
 
