@@ -8,10 +8,11 @@ import draculaV2Theme from "./libs/json2html/themes/user.theme";
 import json2html from "./libs/json2html/json2html.min";
 
 // импортируем подготовленные сцены
-import createShowcaseScene from "./scenes/showcase.scene";
+import createShapeseScene from "./scenes/shapes.scene";
 import createRandomShapesScene from "./scenes/random.scene";
 import createCompositionScene from "./scenes/composition.scene";
 import createPerspectiveScene from "./scenes/perspective.scene";
+import createSpritesScene from "./scenes/sprites.scene";
 
 import pixi2skia from "./core/pixi2skia/convert";
 import { CanvasKit } from "../ts/libs/canvaskit-wasm/types";
@@ -76,7 +77,8 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     const mainContainerUpdateHandler = () => {
         if (mainContainer.children.length > 0) {
             const stageData = {
-                contains: `${mainContainer.children[0].children.length} elements`,
+                // -1 потому что подложка тут явно лишяя в подсчёте :)
+                contains: `${mainContainer.children[0].children.length - 1} elements`,
             };
 
             ui.elements.mainContainerInfo.replaceChild(convertObjectToHTML(stageData));
@@ -98,10 +100,11 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     // Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
     const scenes: Record<string, PIXI.Container> = {
-        showcase:    createShowcaseScene(defaultSceneParams),
+        shapes:    createShapeseScene(defaultSceneParams),
         random:      createRandomShapesScene(defaultSceneParams),
         composition: createCompositionScene(defaultSceneParams),
         perspective: createPerspectiveScene(defaultSceneParams),
+        sprites:     createSpritesScene(defaultSceneParams),
     };
 
     // 
@@ -124,7 +127,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
                 if (object instanceof PIXI.Sprite) {
                     data["class"] = "PIXI.Sprite";
                     data.texture = {
-                        url: object._texture.textureCacheIds[0].split('/')[2],
+                        location: object._texture.textureCacheIds[0].split('/')[1],
                         width: object._texture.width,
                         height: object._texture.height,
                     }
