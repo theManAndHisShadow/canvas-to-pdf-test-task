@@ -2,7 +2,7 @@ import { getColor, getRandomNumber } from "../helpers";
 import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
-const createRandomShapesScene = function(params: {centerPoint: {x: number, y: number}}){
+const createRandomShapesScene = function(params: {centerPoint: {x: number, y: number}, width: number, height: number, background: string}){
     // Глобальные переменные сцены
     const sceneContainer = new PIXI.Container();
     const center = params.centerPoint;                  // Центер сцены
@@ -17,6 +17,18 @@ const createRandomShapesScene = function(params: {centerPoint: {x: number, y: nu
 
     const colors = ['salad', 'chocolate', 'blueberry']  // Доступные цвета
     let counter = 0;                                    // Счётчик фигур
+
+    // добавляем подложку-фон для сцены и сразу интегрируем её в структуру сцены
+    const sceneContainerBackground = PIXI_Wrapper.createRectangle({
+        label: 'scene_background',
+        x: 0, 
+        y: 0, 
+        width: params.width, 
+        height: params.height,
+        fillColor: params.background,
+    });
+
+    sceneContainer.addChild(sceneContainerBackground);
 
     // Отрисовываем в 2 циклах колонки и строки
     for(let x = 0; x < columns; x++) {

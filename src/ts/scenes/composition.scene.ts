@@ -2,7 +2,7 @@ import { getColor } from "../helpers";
 import * as PIXI from "pixi.js-legacy";
 import * as PIXI_Wrapper from "../core/pixi/wrapper";
 
-const createCompositionScene = function(params: {centerPoint: {x: number, y: number}}){
+const createCompositionScene = function(params: {centerPoint: {x: number, y: number}, width: number, height: number, background: string}){
     const center = params.centerPoint;
     const sceneContainer = new PIXI.Container();
 
@@ -10,8 +10,20 @@ const createCompositionScene = function(params: {centerPoint: {x: number, y: num
     const catetWidth = 90;
     const radius = catetWidth / 2;
 
+    // добавляем подложку-фон для сцены и сразу интегрируем её в структуру сцены
+    const sceneContainerBackground = PIXI_Wrapper.createRectangle({
+            label: 'scene_background',
+            x: 0, 
+            y: 0, 
+            width: params.width, 
+            height: params.height,
+            fillColor: params.background,
+        });
+
+    sceneContainer.addChild(sceneContainerBackground);
+
     const background = PIXI_Wrapper.createRectangle({
-        label: 'background',
+        label: 'composition_background',
         x: center.x - (outerSquareWidth / 2), 
         y: center.y - (outerSquareWidth / 2), 
         width: outerSquareWidth, 

@@ -23,7 +23,7 @@ function getLogSequence(from: number, to: number, steps = 10) {
     return sequence;
 }
 
-const createPerspectiveScene = function (params: { centerPoint: { x: number, y: number } }) {
+const createPerspectiveScene = function(params: {centerPoint: {x: number, y: number}, width: number, height: number, background: string}){
     const center = params.centerPoint;
     const sceneContainer = new PIXI.Container();
 
@@ -34,6 +34,18 @@ const createPerspectiveScene = function (params: { centerPoint: { x: number, y: 
 
     const stepW = outerSquareWidth / depth;
     const stepH = outerSquareHeight / depth;
+
+    // добавляем подложку-фон для сцены и сразу интегрируем её в структуру сцены
+    const sceneContainerBackground = PIXI_Wrapper.createRectangle({
+        label: 'scene_background',
+        x: 0, 
+        y: 0, 
+        width: params.width, 
+        height: params.height,
+        fillColor: params.background,
+    });
+
+    sceneContainer.addChild(sceneContainerBackground);
 
     for (let i = depth - 1; i >= 0; i--) {
         const localWidth = stepW * distanceSequence[i];

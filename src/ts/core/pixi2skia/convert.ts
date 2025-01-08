@@ -234,9 +234,6 @@ export default async function pixi2skia(params: { from: PIXI.Container, to: HTML
 
     // Процесс отрисовки 
     surface.drawOnce((canvas: Canvas) => {
-        // Очищаем весь холст
-        canvas.clear(canvasKit.parseColorString(getColor('carbon')));
-
         // Получаем размеры холста
         const sizes = canvas.getSizes();
 
