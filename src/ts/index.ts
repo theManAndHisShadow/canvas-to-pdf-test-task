@@ -14,10 +14,34 @@ import createCompositionScene from "./scenes/composition.scene";
 import createPerspectiveScene from "./scenes/perspective.scene";
 import createSpritesScene from "./scenes/sprites.scene";
 
+// импортируем функцию конвертации и части canvaskit
 import pixi2skia from "./core/pixi2skia/convert";
 import { CanvasKit } from "../ts/libs/canvaskit-wasm/types";
 import CanvasKitInit from "../ts/libs/canvaskit-wasm/canvaskit.js";
 
+/**
+ * Данный файл является главным и определяет последовтальность загрузки компонентов, а так же их поведение.
+ * Каждый блок кода или определение/вызов функции будут описаны своими комментарием. 
+ * Рядом с критически важными функциями будет указатель (римскими цифрами). 
+ * Если указателя нет - значит функция выполняет задачу второго плана (ui или helper функция)
+ * 
+ * Главные этапы работы всего приложения:
+ * I   - загрузка бандлов 'canvaskit.js/canvaskit.wasm. От данного этапа зависит доступ к Skia/canvaskit PDF Backend API;
+ * II  - создание pixi прилоежения, которое будет отрисовывать сцены (контейнеры), помещённые на уровнеь (stage);
+ * III - создание главного контейнера, которое далее будет корневым элементом для конвертации в Skia;
+ * IV  - исполнение кода сцен, результат выполнения которых помещается в набор сцен. Так мы изолируем "внешний код" от кода приложения.
+ *       Нам нет нужды знать какие там производятся операции, кроме знания, что сцена будет единым конттенером с которым можно просто работать.
+ *       Единственно что стоит упомянуть, команды отрисовки силами pixi объединены в "блоки" команд для удобства (если будет интересно взглянуть 
+ *       и понять код сцен, то попутно см. /src/ts/core/pixi/wrapper.ts);
+ * V   - выбор текущей сцены (контейнера) для отрисовки на pixi холсте и конвертации в skia (и отрисовки силами skia соотвественно);
+ * VI  - непосредственно этап отрисовки. Может показаться, что мы только поместили контейнер сцены в главный контейнер, однако в этом и заключается удобство,
+ *       ведь это уже задача самого приложения PIXI отрисовать на своём уровне наши команды (группы команд), на самом же деле это именно вызов отрисовки;
+ * VII - непосредственно вызов функции конвертации pixi в skia, а далее skia в pdf. Используются функции для интерпретации вызовов pixi в skia (см. /src/ts/core/pixi2skia/convert.ts)
+ * На данном этапе основная структура данной реализации: PixiApp -> Stage -> MainContainer -> SceneContainer -> pixi2skiaWrapper() -> ready PDF file.
+ * 
+ */
+
+// Сссылка на элемент анимации загрузки canvaskit
 const preloader = document.querySelector('#app__global-preloder');
 
 // локальная хелпер функция для отрисовки объекта в html
@@ -30,7 +54,9 @@ const convertObjectToHTML = (objectToRender: object) => {
     });
 };
 
+// (I) Подгружаем canvaskit, только если успешно поучили доступ к библиотеке работаем дальше
 CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: CanvasKit) => {
+    // Немного инфо в консоль
     debugLog("ok", "`canvaskit.wasm` successfully loaded to project");
     debugLog("ok", "`CanvasKit` instance is accessible within the given scope");
 
@@ -38,6 +64,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     const width = 450;
     const height = 450;
 
+    // Селекто корневого элемента приложения
     const appRootSelector = '#app-root';
 
     // Корневой элемент приложения
@@ -48,10 +75,12 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         debugLog('err', "can`t find '#app-root' element at DOM");
     }
 
+    // Кладём ссылку на холст, предназначенный для отрисовки силами pixi
     const pixijsCanvas: HTMLCanvasElement = document.querySelector('#app__pixijs-canvas');
     pixijsCanvas.width = width;
     pixijsCanvas.height = height;
 
+     // Кладём ссылку на холст, предназначенный для отрисовки силами skia
     const skiaCanvas: HTMLCanvasElement = document.querySelector('#app__skia-canvas');
     skiaCanvas.width = width;
     skiaCanvas.height = height;
@@ -59,7 +88,8 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     // Центр холста
     const canvasCenterPoint = { x: width / 2, y: height / 2 };
 
-    // Инициализируем pixi приложение
+    // (II) Инициализируем pixi приложение
+    // Далее все сцены будут сначала отрисовываться именно сюда (на холст "pixijsCanvas")
     const app = new PIXI.Application({
         forceCanvas: true,
         view: pixijsCanvas,
@@ -67,13 +97,15 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         height: height,
     });
 
-    // создлаём объект интерфейса
+    // Создаём объект интерфейса приложения
     const ui = new UI(appRootSelector, 350, height);
 
-    // Создаём главный контейнер
+    // (III) Создаём главный контейнер
+    // По сути это весь холст (от угла до угла)
     const mainContainer = new PIXI.Container();
 
     // Обработчик события "обновление контейнера"
+    // Нужен для обновления инфо о количестве дочерниъ элементов в главном контейнере
     const mainContainerUpdateHandler = () => {
         if (mainContainer.children.length > 0) {
             const stageData = {
@@ -85,11 +117,11 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         }
     };
 
-    // обновляем инфо при обновлении наполнения контейнера
+    // Обновляем инфо о дочерних элементах при удалени/добавлении дочерних элементов
     mainContainer.on('childAdded', mainContainerUpdateHandler);
     mainContainer.on('childRemoved', mainContainerUpdateHandler);
 
-    // стандартные параметры для всех сцен - ширрина и фон у всех одинаковый
+    // Установим стандартные параметры для всех сцен - ширрина и фон у всех одинаковый
     const defaultSceneParams = {
         width,
         height,
@@ -97,7 +129,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         background: getColor('carbon'),
     };
 
-    // Массив подготовленных сцен
+    // (IV) Массив подготовленных сцен
     // Имя ключа совпадает с ключом из списка 'ui.element.selectedScenes.valuesList'
     const scenes: Record<string, PIXI.Container> = {
         shapes:       createShapeseScene(defaultSceneParams),
@@ -107,7 +139,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         sprites:      createSpritesScene(defaultSceneParams),
     };
 
-    // 
+    // (V) Достаём ссылку на выбранный контейнер
     let selectedName = JSON.parse(localStorage.getItem('selectedScene'));
     let selectedScene: PIXI.Container = scenes[selectedName];
 
@@ -155,7 +187,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     });
 
 
-    // Инициализация ранее выбранной сцены
+    // (VI) Отрисовываем выбранную сцену 
     mainContainer.addChild(selectedScene);
 
     ui.elements.exportButton.addEventListener('click', () => {
@@ -197,7 +229,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
                 // если накидывать событие через addEventListener, то кнопка будет содержать несколько обработчиков событий
                 // и при переключении сцены и нажати на кнопку, будут срабатывать все обработчики для всех посещённых сцен
                 // коненчо можно запариться с удалением событий, но можно просто перезаписыать каждый раз,
-                // ведь у on + eventName именно такое поведение, что сейчас очень к стати!)
+                // ведь у on + eventName именно такое поведение, что сейчас очень кстати
                 ui.elements.exportButton.body.onclick = () => {
                     downloadLink.click();
 
@@ -216,7 +248,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
         selectedName = JSON.parse(localStorage.getItem('selectedScene'));
         selectedScene = scenes[selectedName];
 
-        // передобавляем сцену в главный окнтейнер
+        // (VI) Отрисовываем только что выбранную сцену
         mainContainer.addChild(selectedScene);
 
         // После успешной загрузки canvasKit - вызываем для конвертации pixi в skia и скачивания pdf версии холста
@@ -228,7 +260,7 @@ CanvasKitInit({ locateFile: (file: any) => `../js/${file}` }).then((canvasKit: C
     // Добавляем контейнер на уровень (холст)
     app.stage.addChild(mainContainer);
 
-    // После успешной загрузки canvasKit - вызываем для конвертации pixi в skia и скачивания pdf версии холста
+    // (VII) После успешной загрузки canvasKit - вызываем для конвертации pixi в skia и скачивания pdf версии холста
     pixi2skiaWrapper();
 
     // Убираем слой с анимацией загрузки как только всё холсты будут инициализированы и первая конвертация пройдёт успешно
