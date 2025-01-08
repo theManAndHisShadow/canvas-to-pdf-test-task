@@ -37,7 +37,7 @@ const createShowcaseScene = function(params: {centerPoint: {x: number, y: number
         borderColor: getColor('brightRed')
     });
 
-    const sprite_1 = PIXI_Wrapper.createSprite(167, 48, 254, 196, '../assets/window.png');
+    const sprite_1 = PIXI_Wrapper.createSprite('../assets/window.png', 167, 48, 254, 196);
 
     sceneContainer.addChild(sprite_1);
     sceneContainer.addChild(triangle_1);
