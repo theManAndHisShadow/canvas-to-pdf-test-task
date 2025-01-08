@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Глобальный стиль проекта -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <title>canvas-to-pdf-test-task</title>
+<script defer src="js/bundle.js"></script></head>
+
+<body>
+    <div id="app-root">
+        <div id="app__global-preloder">
+            <div class="lds-ripple">
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="canvas-wrapper" data-label="pixi.js-canvas">
+            <canvas id="app__pixijs-canvas"></canvas>
+        </div>
+
+        <div class="canvas-wrapper" data-label="skia-canvas" style="margin-left: 20px;">
+            <canvas id="app__skia-canvas"></canvas>
+        </div>
+    </div>
+</body>
+
+</html>
