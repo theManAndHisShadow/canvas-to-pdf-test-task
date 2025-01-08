@@ -230,6 +230,9 @@ export function getColor(query: string): string {
         darkGreen:   'rgba(12, 38, 12, 1)',
         brightGreen: 'rgba(6, 114, 6, 1)',
 
+        darkYellow:   'rgba(38, 38, 12, 1)',  
+        brightYellow: 'rgb(182, 148, 48)', 
+
         darkSilver:   'rgba(96, 96, 96, 1)',
         brightSilver: 'rgba(212, 212, 212, 1)',
 
