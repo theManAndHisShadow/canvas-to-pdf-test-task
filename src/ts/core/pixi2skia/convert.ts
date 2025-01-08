@@ -1,6 +1,6 @@
 import { debugLog, getColor, radians2degrees, imageToCanvas, canvasToUint8Array, uint8ArrayToBase64 } from "../../helpers";
 import * as PIXI from "pixi.js-legacy";
-import { CanvasKit, Canvas, Rect, SkPicture } from "../../../ts/libs/canvaskit-wasm/types";
+import { CanvasKit, Canvas, Rect, SkPicture, Image } from "../../../ts/libs/canvaskit-wasm/types";
 import { drawCircle, drawPolygon, drawRectangle } from "./shapes";
 
 
@@ -108,21 +108,22 @@ function _renderPixiGraphics(graphics: PIXI.Graphics, canvas: Canvas, canvasKit:
  * @param container - ссылка на PIXI.Container
  * @param canvas - ссылка на холст SKIA
  * @param canvasKit - ссылка на объект модуля canvaskit
+ * @param referanceToCache - ссылка не кэш текстур
  */
-function _renderPixiContainer(container: PIXI.Container, canvas: Canvas, canvasKit: CanvasKit) {
+function _renderPixiContainer(container: PIXI.Container, canvas: Canvas, canvasKit: CanvasKit, textureCache: Map<string, Image>) {
     // Проходлимся по всем вложенным элементам контейнера
-    container.children.forEach((containerItem) => {
+    container.children.forEach(containerItem => {
         // Так как цепочка наследования приходит по итогу к PIXI.Container,
         // То логику проверки принадлежности к классу нужно строить таким образом,
         // чтобы менее спецефичный класс стоял выше, а более общий - ниже по цепочке проверок
         if (containerItem instanceof PIXI.Sprite) {
             // N.B: Пока что зесь возникают проблемы с отрисовкой
             // Поэтому я временно отключил отрисовку cпрайтов
-            // _renderPixiSprite(containerItem, canvas, canvasKit);
+            _renderPixiSprite(containerItem, canvas, canvasKit, textureCache);
         } else if (containerItem instanceof PIXI.Graphics) {
             _renderPixiGraphics(containerItem, canvas, canvasKit);
         } else if (containerItem instanceof PIXI.Container) {
-            _renderPixiContainer(containerItem, canvas, canvasKit);
+            _renderPixiContainer(containerItem, canvas, canvasKit, textureCache);
         } else {
             debugLog('warn', 'unknow type');
             console.log(containerItem);
@@ -134,67 +135,75 @@ function _renderPixiContainer(container: PIXI.Container, canvas: Canvas, canvasK
 
 /**
  * Отрисовывает спрайт из PIXI внутри SKIA
- * @param sprite 
- * @param canvas 
- * @param canvasKit 
+ * @param sprite - ссылка на PIXI.Sprite
+ * @param canvas - ссылка на холст SKIA
+ * @param canvasKit - ссылка на объект модуля canvaskit
+ * @param referanceToCache - ссылка не кэш текстур
  */
-function _renderPixiSprite(sprite: PIXI.Sprite, canvas: Canvas, canvasKit: CanvasKit) {
+function _renderPixiSprite(sprite: PIXI.Sprite, canvas: Canvas, canvasKit: CanvasKit, textureCache: Map<string, Image>) {
     // Получаем базовую текстуру спрайта
-    const baseTexture = sprite.texture.baseTexture;
+    const textureURL = sprite.texture.textureCacheIds[0];
 
-    // Проверяем, что текстура загружена
-    if (!baseTexture.resource) {
-        throw new Error('Base texture resource is not available');
-    }
+    // Получаем готовый объект текстур из кэша текстур
+    let texture = textureCache.get(textureURL);
 
-    // Далее важно чтобы ресурс текстуры был загружен
-    // Поэтому через промист ожидаем когда он будет готов к работе
-    baseTexture.resource.load().then((loadedImage) => {
-        // Тут соглашаемся что загруженная картинка это именно HTML картинка
-        const image = (loadedImage as PIXI.ImageResource).source as HTMLImageElement;
+    // отрисовываем текстуру по координатам спратай PIXI
+    canvas.drawImage(texture, sprite.x, sprite.y, null);
+};
+
+
+
+/**
+ * Предзагружает текстуры всего контейнера и возвращает структуру Map, которая хранить пару "url текстуры: SkImage"
+ * @param rootContainer - контейнер, текстуры внутри которого нужно предзагрузить
+ * @param canvasKit - ссылка на актуальный экземпляр CanvasKit
+ * @returns готовый кеш текстур Map<string, Image>
+ */
+async function _preloadTextures(rootContainer: PIXI.Container, canvasKit: CanvasKit) {
+    // Загружает текстуры по указанному url, сразу устанавливает размеры для текстуры через аргументы width и height
+    const __loadTextureFrom = async (url: string, width: number, height: number) => {
+        // Используя дефолтные методы загружаем картинку
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const bitmap = await createImageBitmap(blob, {
+            resizeWidth: width,
+            resizeHeight: height,
+        });
+
+        // Создаём экземпляр SkImage
+        const SkImage = canvasKit.MakeImageFromCanvasImageSource(bitmap);
     
-        // Так как важный метод из SKIA работает с Uint8Arra, то
-        // преобразуем с помозью функий хлеперов загруженную картинку по цепочке:
-        //  Процесс загрузки -> HTMLImageElement 
-        //  HTMLImageElement -> Canvas 
-        //  Canvas -> Uint8Array 
-        const tempCanvas = imageToCanvas(image);
-        const uint8Array = canvasToUint8Array(tempCanvas);
-        
-        // Создаем объект картинки SKIA
-        const skiaImage = canvasKit.MakeImageFromEncoded(uint8Array);
-        if (!skiaImage) {
+        if (!SkImage) {
             throw new Error('Failed to create SkImage');
         }
-        
-        // Отладочный блок кода
-        const blob = new Blob([uint8Array], { type: 'image/png' });
-        const url = URL.createObjectURL(blob);
-        const base64 = uint8ArrayToBase64(uint8Array);
-        console.log('Skia image successfully created:', skiaImage);
-        console.log('data:image/png;base64,' + base64);
-        console.log(url);
+    
+        return SkImage;
+    };
 
-        // Немного подготовки
-        const width = sprite.width;
-        const height = sprite.height;
-        const paint = new canvasKit.Paint();
-        paint.setAntiAlias(true);  // Включаем антиалиасинг
+    // Ищет внутри контейнера все спрайты и загружает в кеш текстур уже в виде текстуры Skia
+    const __parseTextures = async (container: PIXI.Container, referanceToCache: Map<string, Image>) => {
+        for (const child of container.children) {
+            // Если данный элемент контейнера - спрайт, то загружаем её текстур в кэш
+            if (child instanceof PIXI.Sprite) {
+                let url = child.texture.textureCacheIds[0];
+                let texture = await __loadTextureFrom(url, child.width, child.height);
+    
+                referanceToCache.set(url, texture);
+            } else if (child instanceof PIXI.Container) {
+                // иначе рекурсивно парсим вложенный контейнер
+                await __parseTextures(child, referanceToCache);
+            }
+        }
+    
+        return referanceToCache;
+    };
+    
+    // Дожидаемся загрузки всех ресурсов
+    let loadedTextures = await __parseTextures(rootContainer, new Map());
 
-        // Создаем исходный прямоугольник (src)
-        const sourceFrame = canvasKit.XYWHRect(0, 0, width, height);
-        // Создаем целевой прямоугольник (dest)
-        const targetFrame = canvasKit.XYWHRect(0, 0, width, height);
-
-        console.log("Source frame:", sourceFrame);
-        console.log("Target frame:", targetFrame);
-
-
-        // Отрисовываем изображение на канвасе
-        // canvas.drawImageRect(skImage, sourceFrame, targetFrame, paint);
-        canvas.drawImage(skiaImage, 0, 0, paint);
-    });
-};
+    // Возвращаем готовый кэш текстур
+    return loadedTextures;
+}
 
 
 
@@ -202,15 +211,26 @@ function _renderPixiSprite(sprite: PIXI.Sprite, canvas: Canvas, canvasKit: Canva
  * Конвертирует контейнер из PIXI.js в холст SKIA
  * @param params.from - Объект контейнера, который нужно перенести в SKIA
  * @param params.to - На каком холсте отрисовать данные из SKIA
- * @param params.use - ссылка на готовый к работе объект модуля canvaskit
+ * @param params.use - ссылка на готовый к работе объект модулntя canvaskit
  */
 export default async function pixi2skia(params: { from: PIXI.Container, to: HTMLCanvasElement, use: CanvasKit, onComplete?: (data: any) => void}) {
-    let canvasKit = params.use;
+    const canvasKit = params.use;
+    const rootContainer = params.from;
+
+    // Ввиду асинхронной природы загрузки текстур, нужно учесть нюанс 
+    // связанный с временим жизни 'canvas' внутри сызова 'surface.drawOnce()'
+    // Если пытаться отрисовать цеонтейнер с текстурой напрямую, то, 
+    // пока загрузится картинка (а ведсь асинхронный вызов подгрузки не блокирует ренден),
+    // canvas перестанет существовать, ведь дргуие окманды орисовки исполнятся 
+    // и текущий сеанс отрисовки внутри 'drawOnce' будет завершён с удалением ссылок
+    // Поэтому было решено сделать предзагрузку ресурсов, загруженные ресурсы будут храниться 
+    // в данном кэше и будут доступны до начала сеанса отрисовки
+    const textureCache = await _preloadTextures(rootContainer, canvasKit);
 
     // Создаём некоторые важные объекты из canvaskit
     const surface = canvasKit.MakeCanvasSurface(params.to);
     const paint = new canvasKit.Paint();
-    paint.setAntiAlias(true);;
+    paint.setAntiAlias(true);
 
     // Процесс отрисовки 
     surface.drawOnce((canvas: Canvas) => {
@@ -232,12 +252,14 @@ export default async function pixi2skia(params: { from: PIXI.Container, to: HTML
         // Отрисовываем корневой контейнер из Pixi
         // Далее функция сама отрисует всё содержимрое контейнера
         // в качестве цели, куда отрисовываем указываем видимый холст SkCanvas (canvas)
-        _renderPixiContainer(params.from, canvas, canvasKit);
+        // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур прроизошла корректно
+        _renderPixiContainer(params.from, canvas, canvasKit, textureCache);
 
         // дублируем для захвата команд отрисовки Skia
         // Необходимо для конвертации SkCanvas в SkPDF
         // в качестве цели, куда отрисовать указываем специальный холст (captureCanvas) для захвата команд
-        _renderPixiContainer(params.from, captureCanvas, canvasKit);
+         // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур прроизошла корректно
+        _renderPixiContainer(params.from, captureCanvas, canvasKit, textureCache);
 
         debugLog('ok', 'pixi canvas successfully converted to skia canvas');
 
