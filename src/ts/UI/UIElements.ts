@@ -106,7 +106,7 @@ export default class UIElement extends SynteticEventTarget{
                   }
             } else if(this.type === 'button') {
                 valueContainer = document.createElement('button');
-                valueContainer.innerText = 'Click me';
+                valueContainer.innerText = 'Save';
 
                 valueContainer.addEventListener('click', () => {
                     this.dispatchEvent('click', {});

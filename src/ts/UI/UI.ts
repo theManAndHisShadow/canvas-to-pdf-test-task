@@ -64,8 +64,8 @@ export default class UI {
 
             // записываем их в экземляр класса
             this.elements = {
-                exportButton,
                 selectedScene,
+                exportButton,
                 mainContainerInfo,
                 mouseTarget,
             };
@@ -76,8 +76,8 @@ export default class UI {
 
             // добавляем в внутреннией контейнер панели
             containerInner.appendChild(title);
-            containerInner.appendChild(this.elements.exportButton.body);
             containerInner.appendChild(this.elements.selectedScene.body);
+            containerInner.appendChild(this.elements.exportButton.body);
             containerInner.appendChild(this.elements.mainContainerInfo.body);      
             containerInner.appendChild(this.elements.mouseTarget.body);
 
