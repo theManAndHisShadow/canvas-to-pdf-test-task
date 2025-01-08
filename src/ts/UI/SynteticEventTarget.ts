@@ -3,7 +3,7 @@
  * Добавляет некотору реактивность, позволяя избегать callback-hell
  */
 export default class SynteticEventTarget {
-    events: EventStorage;
+    events: Record<string,  Array<(data: any) => void>>;
 
     constructor() {
         // тут мы храним пары "название события": "массив с функциями обратного вызова"

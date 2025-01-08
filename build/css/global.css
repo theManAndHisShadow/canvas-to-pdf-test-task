@@ -29,10 +29,6 @@ body {
     transition: 0.85s ease-out;
 }
 
-#app-root #app__skia-canvas {
-    margin-right: 20px;
-}
-
 .app-ui__container {
     font-family: monospace;
     color: white;
@@ -108,6 +104,7 @@ body {
 #app__global-preloder .lds-ripple {
     left: 50%;
     top: 41%;
+    z-index: 10;
 }
 
 #app__global-preloder .lds-ripple,
@@ -132,6 +129,26 @@ body {
 
 #app__global-preloder .lds-ripple div:nth-child(2) {
     animation-delay: -0.5s;
+}
+
+.canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.canvas-wrapper::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1;
+    font-family: monospace;
 }
 
 @keyframes lds-ripple {

@@ -1,14 +1,10 @@
 import UIElement from "./UIElements";
 
-interface UIElementsMap {
-      [key: string]: UIElement;
-}
-
 export default class UI {
     width: number;
     height: number;
     root: HTMLElement;
-    elements: UIElementsMap
+    elements: Record<string, UIElement>;
 
       constructor(cssSelector: string, width: number, height: number) {
             const container = document.createElement('div');
@@ -38,8 +34,8 @@ export default class UI {
                   type: 'dropdown-list',
                   label: 'Select scene',
                   classNames: ['app-ui__dropdown-list'],
-                  valuesList: ['showcase', 'random', 'composition', 'perspective'],
-                  value: 'showcase',
+                  valuesList: ['shapes', 'sprites', 'qr_code', 'composition', 'perspective'],
+                  value: 'shapes',
                   settingsKey: 'selectedScene',
             });
 
@@ -64,8 +60,8 @@ export default class UI {
 
             // записываем их в экземляр класса
             this.elements = {
-                exportButton,
                 selectedScene,
+                exportButton,
                 mainContainerInfo,
                 mouseTarget,
             };
@@ -76,8 +72,8 @@ export default class UI {
 
             // добавляем в внутреннией контейнер панели
             containerInner.appendChild(title);
-            containerInner.appendChild(this.elements.exportButton.body);
             containerInner.appendChild(this.elements.selectedScene.body);
+            containerInner.appendChild(this.elements.exportButton.body);
             containerInner.appendChild(this.elements.mainContainerInfo.body);      
             containerInner.appendChild(this.elements.mouseTarget.body);
 
