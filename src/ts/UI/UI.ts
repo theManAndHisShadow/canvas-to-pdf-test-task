@@ -1,14 +1,10 @@
 import UIElement from "./UIElements";
 
-interface UIElementsMap {
-      [key: string]: UIElement;
-}
-
 export default class UI {
     width: number;
     height: number;
     root: HTMLElement;
-    elements: UIElementsMap
+    elements: Record<string, UIElement>;
 
       constructor(cssSelector: string, width: number, height: number) {
             const container = document.createElement('div');

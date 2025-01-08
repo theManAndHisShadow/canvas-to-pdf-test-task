@@ -161,12 +161,7 @@ export function debugLog(status: 'ok' | 'warn' | 'err' | 'info', messageText: st
  * @returns 
  */
 export function getColor(query: string): string {
-    // Создаём локальный интерфейс для хранения пар "ключ (название цвета): код цвета (rgba)"
-    interface colorStorage {
-        [key: string]: string,
-    }
-
-    const colors: colorStorage = {
+    const colors: Record<string, string> = {
         carbon:      'rgba(14, 14, 14, 1)',
         lightCarbon: 'rgba(54, 54, 54, 1)',
         
