@@ -49,10 +49,11 @@ function _applyStyleTo(graphics: PIXI.Graphics, fillColor: string, borderThickne
  * @param borderColor - Цвет обводки (в формате строки, например, 'black' или '#000000')
  * @returns - Графический объект с заданными параметрами
  */
-function _createShapeGraphics(label: string, x: number, y: number, angle: number, fillColor: string, borderThickness: number, borderColor: string): PIXI.Graphics {
+function _createShapeGraphics(label: string, x: number, y: number, angle: number, fillColor: string, borderThickness: number, borderColor: string, isClosed: boolean): PIXI.Graphics {
     const shapeGraphics = new PIXI.Graphics();
 
     shapeGraphics.label = label;
+    shapeGraphics.isClosed = isClosed;
     if (angle && angle !== 0) _applyRotationTo(shapeGraphics, x, y, angle);
     _applyStyleTo(shapeGraphics, fillColor, borderThickness, borderColor);
 
@@ -87,7 +88,7 @@ export function createRectangle(params: {
 }): PIXI.Graphics {
     const { label, x, y, width, height, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const rectangleGraphics = _createShapeGraphics(label, x, y, angle, fillColor, borderThickness, borderColor);
+    const rectangleGraphics = _createShapeGraphics(label, x, y, angle, fillColor, borderThickness, borderColor, true);
     rectangleGraphics.drawRect(x, y, width, height);
     return rectangleGraphics;
 }
@@ -118,7 +119,7 @@ export function createSemiCircle(params: {
 }): PIXI.Graphics {
     const { label, cx, cy, radius, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const semiCircleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor);
+    const semiCircleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
 
     const basicAngle = 90;
     const angleInRadians = degrees2radians(basicAngle);
@@ -159,7 +160,7 @@ export function createCircle(params: {
 }): PIXI.Graphics {
     const { label, cx, cy, radius, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const circleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor);
+    const circleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
     circleGraphics.drawCircle(cx, cy, radius);
     return circleGraphics;
 }
@@ -192,7 +193,7 @@ export function createTriangle(params: {
 }): PIXI.Graphics {
     const { label, cx, cy, height, baseWidth, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const triangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor);
+    const triangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
 
     const topVertex = { x: cx, y: cy - height / 2 };
     const leftVertex = { x: cx - baseWidth / 2, y: cy + height / 2 };
@@ -233,7 +234,7 @@ export function createEquilateralTriangle(params: {
 }): PIXI.Graphics {
     const { label, cx, cy, sideLength, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const equilateralTriangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor);
+    const equilateralTriangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
 
     const height = (Math.sqrt(3) / 2) * sideLength;
 
@@ -278,7 +279,7 @@ export function createRightTriangle(params: {
 }): PIXI.Graphics {
     const { label, cx, cy, catet1, catet2, fillColor, borderThickness = 0, borderColor = "", angle = 0 } = params;
 
-    const rightTriangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor);
+    const rightTriangleGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
 
     const rightAngleVertex = { x: cx, y: cy };
     const topVertex = { x: cx, y: cy - catet1 };
@@ -292,6 +293,140 @@ export function createRightTriangle(params: {
 
     return rightTriangleGraphics;
 }
+
+
+/**
+ * Создаёт звезду с линиями в сцене PIXI.js
+ * @param params.label - метка объекта
+ * @param params.cx - координата центра по оси X
+ * @param params.cy - координата центра по оси Y
+ * @param params.radius - радиус внешней звезды
+ * @param params.spikes - количество лучей звезды
+ * @param params.fillColor - цвет заливки звезды
+ * @param [params.borderThickness=0] - толщина границы звезды
+ * @param [params.borderColor=""] - цвет границы звезды
+ * @param [params.angle=0] - угол поворота звезды
+ * @returns - графический объект звезды
+ */
+export function createStar(params: {
+    label: string;
+    cx: number;
+    cy: number;
+    radius: number;
+    spikes: number;
+    fillColor: string;
+    borderThickness?: number;
+    borderColor?: string;
+    angle?: number;
+}): PIXI.Graphics {
+    const { 
+        label, 
+        cx, 
+        cy, 
+        radius, 
+        spikes, 
+        fillColor, 
+        borderThickness = 0, 
+        borderColor = "", 
+        angle = 0 
+    } = params;
+
+    // Создание графического объекта
+    const starGraphics = _createShapeGraphics(label, cx, cy, angle, fillColor, borderThickness, borderColor, true);
+
+    // Устанавливаем начальные параметры
+    const step = Math.PI / spikes; // Угол между вершинами
+
+    // Рисуем звезду
+    for (let i = 0; i < 2 * spikes; i++) {
+        const currentAngle = angle + i * step;
+        const r = i % 2 === 0 ? radius : radius / 2; // Чередуем внешний и внутренний радиусы
+        const x = cx + r * Math.cos(currentAngle);
+        const y = cy + r * Math.sin(currentAngle);
+
+        if (i === 0) {
+            starGraphics.moveTo(x, y);
+        } else {
+            starGraphics.lineTo(x, y);
+        }
+    }
+
+    // Закрываем фигуру
+    starGraphics.closePath();
+
+    return starGraphics;
+}
+
+/**
+ * Создаёт спираль в сцене PIXI.js
+ * @param params.label - метка объекта
+ * @param params.cx - координата центра по оси X
+ * @param params.cy - координата центра по оси Y
+ * @param params.radius - итоговый радиус спирали
+ * @param params.lineThickness - толщина линии спирали
+ * @param params.spacing - расстояние между витками (толщина отступов)
+ * @param params.lineColor - цвет линии спирали
+ * @returns - графический объект спирали
+ */
+export function createSpiral(params: {
+    label: string;
+    cx: number;
+    cy: number;
+    radius: number;
+    lineThickness: number;
+    spacing: number;
+    lineColor: string;
+    fillColor: string;
+}): PIXI.Graphics {
+    const {
+        label,
+        cx,
+        cy,
+        radius,
+        lineThickness,
+        spacing,
+        lineColor,
+    } = params;
+
+    // Создание графического объекта
+    const spiralGraphics = new PIXI.Graphics();
+    spiralGraphics.label = label;
+    spiralGraphics.isClosed = false;
+
+    spiralGraphics.beginFill(params.fillColor);
+
+    // Устанавливаем стиль линии
+    spiralGraphics.lineStyle(lineThickness, PIXI.utils.string2hex(lineColor));
+
+    // Определяем количество витков
+    const turns = Math.floor(radius / spacing);
+
+    // Количество точек на один виток для плавности
+    const pointsPerTurn = 100;
+    const totalPoints = pointsPerTurn * turns;
+
+    for (let i = 0; i <= totalPoints; i++) {
+        // Угол текущей точки
+        const angle = (i / pointsPerTurn) * 2 * Math.PI;
+
+        // Текущий радиус с учётом отступов
+        const currentRadius = (i / totalPoints) * radius;
+
+        // Координаты точки
+        const x = cx + currentRadius * Math.cos(angle);
+        const y = cy + currentRadius * Math.sin(angle);
+
+        if (i === 0) {
+            spiralGraphics.moveTo(x, y);
+        } else {
+            spiralGraphics.lineTo(x, y);
+        }
+    }
+
+    return spiralGraphics;
+}
+
+
 
 
 /**
