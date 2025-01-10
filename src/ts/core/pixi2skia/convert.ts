@@ -232,8 +232,6 @@ function _renderPixiContainer(container: PIXI.Container, canvas: Canvas, canvasK
         // То логику проверки принадлежности к классу нужно строить таким образом,
         // чтобы менее спецефичный класс стоял выше, а более общий - ниже по цепочке проверок
         if (containerItem instanceof PIXI.Sprite) {
-            // N.B: Пока что зесь возникают проблемы с отрисовкой
-            // Поэтому я временно отключил отрисовку cпрайтов
             _renderPixiSprite(containerItem, canvas, canvasKit, textureCache);
         } else if (containerItem instanceof PIXI.Graphics) {
             _renderPixiGraphics(containerItem, canvas, canvasKit);
@@ -262,7 +260,7 @@ function _renderPixiSprite(sprite: PIXI.Sprite, canvas: Canvas, canvasKit: Canva
     // Получаем готовый объект текстур из кэша текстур
     let texture = textureCache.get(textureURL);
 
-    // отрисовываем текстуру по координатам спратай PIXI
+    // отрисовываем текстуру по координатам спрайта PIXI
     canvas.drawImage(texture, sprite.x, sprite.y, null);
 };
 
@@ -305,7 +303,7 @@ async function _preloadTextures(rootContainer: PIXI.Container, canvasKit: Canvas
     
                 referanceToCache.set(url, texture);
             } else if (child instanceof PIXI.Container) {
-                // иначе рекурсивно парсим вложенный контейнер
+                // иначе если это снова контейнер - рекурсивно парсим вложенный контейнер
                 await __parseTextures(child, referanceToCache);
             }
         }
@@ -327,6 +325,7 @@ async function _preloadTextures(rootContainer: PIXI.Container, canvasKit: Canvas
  * @param params.from - Объект контейнера, который нужно перенести в SKIA
  * @param params.to - На каком холсте отрисовать данные из SKIA
  * @param params.use - ссылка на готовый к работе объект модулntя canvaskit
+ * @param params.onComplete - действие по завершениею конвертации
  */
 export default async function pixi2skia(params: { from: PIXI.Container, to: HTMLCanvasElement, use: CanvasKit, onComplete?: (data: any) => void}) {
     const canvasKit = params.use;
@@ -334,12 +333,12 @@ export default async function pixi2skia(params: { from: PIXI.Container, to: HTML
 
     // Ввиду асинхронной природы загрузки текстур, нужно учесть нюанс 
     // связанный с временим жизни 'canvas' внутри сызова 'surface.drawOnce()'
-    // Если пытаться отрисовать цеонтейнер с текстурой напрямую, то, 
-    // пока загрузится картинка (а ведсь асинхронный вызов подгрузки не блокирует ренден),
-    // canvas перестанет существовать, ведь дргуие окманды орисовки исполнятся 
-    // и текущий сеанс отрисовки внутри 'drawOnce' будет завершён с удалением ссылок
-    // Поэтому было решено сделать предзагрузку ресурсов, загруженные ресурсы будут храниться 
-    // в данном кэше и будут доступны до начала сеанса отрисовки
+    // Если пытаться отрисовать контейнер с текстурой напрямую, то
+    // пока загрузится картинка (а ведь асинхронный вызов подгрузки не блокирует отрисовку),
+    // canvas перестанет существовать, так как дргуие комманды отрисовки УЖЕ исполнятся 
+    // и текущий сеанс отрисовки внутри 'drawOnce' будет завершён с удалением ссылок.
+    // Именно по этой причине было решено сделать предзагрузку ресурсов, 
+    // загруженные ресурсы будут храниться в данном кэше и будут доступны уже до начала сеанса отрисовки
     const textureCache = await _preloadTextures(rootContainer, canvasKit);
 
     // Создаём некоторые важные объекты из canvaskit
@@ -352,10 +351,10 @@ export default async function pixi2skia(params: { from: PIXI.Container, to: HTML
         // Получаем размеры холста
         const sizes = canvas.getSizes();
 
-        // выделяем олатсь захвата
+        // выделяем область захвата холста
         let bounds: Rect = canvasKit.LTRBRect(0, 0, sizes.width, sizes.height);
 
-        // Создаём объект, которы йбудет вести запись команд отрисовки
+        // Создаём объект, который будет вести запись команд отрисовки
         let recorder = new canvasKit.PictureRecorder();
 
         // резльутат - объект записи
@@ -364,18 +363,18 @@ export default async function pixi2skia(params: { from: PIXI.Container, to: HTML
         // Отрисовываем корневой контейнер из Pixi
         // Далее функция сама отрисует всё содержимрое контейнера
         // в качестве цели, куда отрисовываем указываем видимый холст SkCanvas (canvas)
-        // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур прроизошла корректно
+        // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур произошла корректно
         _renderPixiContainer(params.from, canvas, canvasKit, textureCache);
 
         // дублируем для захвата команд отрисовки Skia
         // Необходимо для конвертации SkCanvas в SkPDF
         // в качестве цели, куда отрисовать указываем специальный холст (captureCanvas) для захвата команд
-         // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур прроизошла корректно
+         // Так же важно передать ссылку на кэш текстур чтобы отрисовка текстур произошла корректно
         _renderPixiContainer(params.from, captureCanvas, canvasKit, textureCache);
 
         debugLog('ok', 'pixi canvas successfully converted to skia canvas');
 
-        // Получаем последовтальность кооманд и трансформаций
+        // Получаем последовтальность команд и трансформаций
         let capture: SkPicture = recorder.finishRecordingAsPicture();
 
         // если запись создалась успешно и есть коллбек - вызываем коллбек и передаём данные по конвертации
