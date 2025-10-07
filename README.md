@@ -1,3 +1,4 @@
+Ссылка на онлайн-демо: https://themanandhisshadow.github.io/canvas-to-pdf-test-task/
 
 # О проекте
 
